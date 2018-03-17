@@ -1,0 +1,18 @@
+{
+  "main": "index.js",
+  "name": "vk-desktop-app",
+  "version": "0.0.1",
+  "description": "Десктопное приложение ВКонтакте",
+  "author": "danyadev",
+  "license": "Apache 2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danyadev/vk-desktop-app"
+  },
+  "bugs": {
+    "url": "https://github.com/danyadev/vk-desktop-app/issues"
+  },
+  "devDependencies": {
+    "electron-reload": "^1.2.2"
+  }
+}
