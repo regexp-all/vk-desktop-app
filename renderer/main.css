@@ -1,0 +1,53 @@
+/* 
+  Copyright © 2018 danyadev
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+
+/* Контактные данные:
+   vk: https://vk.com/danyadev
+   telegram: https://t.me/danyadev
+   email: danyadev@mail.ru
+   gmail: danyadev0@gmail.com
+   github: https://github.com/danyadev/vk-desktop-app
+*/
+
+* { box-sizing: border-box }
+
+body {
+  font-family: 'Lucida Grande', 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
+  font-size: 14px;
+  margin: 0;
+}
+
+.tabs {
+  background: #fafbfc;
+  border-bottom: 1px solid #e7e8ec;
+  padding: 0 2px;
+}
+
+.tab {
+  display: inline-block;
+  padding: 8px;
+  user-select: none;
+  color: #656565;
+  cursor: pointer;
+  transition: color .2s;
+}
+
+.tab_active, .tab:hover { color: #000 }
+.tab_active { border-bottom: 2px solid #b5b5b5 }
+
+.tab_content { display: none }
+
+.content_active { display: block }

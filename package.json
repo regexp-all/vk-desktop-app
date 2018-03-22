@@ -1,7 +1,7 @@
 {
   "main": "index.js",
   "name": "vk-desktop-app",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Десктопное приложение ВКонтакте",
   "author": "danyadev",
   "license": "Apache 2.0",

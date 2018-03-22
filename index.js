@@ -34,6 +34,7 @@ try {
       __dirname + '/.gitignore',
       __dirname + '/index.js',
       __dirname + '/LICENSE',
+      __dirname + '/renderer/opts.json',
       __dirname + '/README.md',
       __dirname + '/node_modules',
       __dirname + '/package.json',
