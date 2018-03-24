@@ -32,6 +32,7 @@ content.children[0].classList.add('content_active');
 
 [].slice.call(tabs.children).forEach(tab => {
   tab.addEventListener('click', e => {
+    if(document.querySelector('.tab_active') == e.target) return;
     let tabIndex = [].slice.call(tabs.children).indexOf(e.target);
     
     document.querySelector('.tab_active').classList.remove('tab_active');
@@ -42,13 +43,25 @@ content.children[0].classList.add('content_active');
   });
 });
 
+const fs = require('fs');
 const vkapi = require('./vkapi');
 
-// можно использовать телефон в качестве логина
-// vkapi.login('your phone bumber', 'password', data => console.log(data));
+var users = fs.readFileSync('./renderer/users.json', 'utf-8'),
+    wrapper_login = document.querySelector('.wrapper_login'),
+    wrapper_content = document.querySelector('.wrapper_content');
 
-// а можно и почту
-// vkapi.login('your email', 'password', data => console.log(data));
-
-// выводится (и если таковой еще не было, то и добавляется в opts.json)
-// токен, айди юзера и почта или номер телефона
+if(users == '{}') {
+  wrapper_login.style.display = 'block';
+  // пустой файлик, нужно ввести данные в поле
+  // vkapi.auth login, password, platform
+} else {
+  wrapper_content.style.display = 'block';
+  
+  users = JSON.parse(users);
+  let keys = Object.keys(users), user_id;
+  keys.forEach(key => { if(users[key].active) user_id = key });
+  user = users[user_id];
+  
+  // user - инфа о юзере из users.json
+  // весь код, передача параметров другим функциям
+}

@@ -27,14 +27,15 @@ process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
 
 const { app, BrowserWindow } = require('electron');
 
-try {
-  require('electron-reload')(__dirname, {
+try { // это находится за пределами моего проекта и используется всеми другими моими проектами.
+      // так сделано чтобы в node_modules небыло лишних вещей
+  require('./../reload/node_modules/electron-reload')(__dirname, {
     ignored: [
       __dirname + '/.git',
       __dirname + '/.gitignore',
       __dirname + '/index.js',
       __dirname + '/LICENSE',
-      __dirname + '/renderer/opts.json',
+      __dirname + '/renderer/users.json',
       __dirname + '/README.md',
       __dirname + '/node_modules',
       __dirname + '/package.json',

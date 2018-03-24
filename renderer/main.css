@@ -30,6 +30,8 @@ body {
   margin: 0;
 }
 
+.wrapper_login, .wrapper_content { display: none }
+
 .tabs {
   background: #fafbfc;
   border-bottom: 1px solid #e7e8ec;

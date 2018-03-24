@@ -42,18 +42,12 @@ UFT_VIDEO:              ['video_file', 'video.save']
 */
 
 const https = require('https');
-const toURLString = require('querystring').stringify;
 const fs = require('fs');
+const toURLString = require('querystring').stringify;
 
 var method = (method, params, callback) => {
-  if(typeof params == 'function') { // если перепутали callback и params или не написали params
-    tmParams = params;
-    params = typeof callback == 'object' ? callback : {};
-    callback = tmParams;
-  }
-  
   params = params || {};
-  params.v = params.v || 5.73; // последняя версия API
+  params.v = params.v || 5.73;
   
   https.get({
     host: 'api.vk.com',
@@ -66,43 +60,30 @@ var method = (method, params, callback) => {
   });
 }
 
-var login = (login, password, callback) => {
-  if(!login || !password || !callback) throw new Error('Логин, пароль или возвратная функция не была передана.');
+var keys = {
+  windows:       [3697615, 'AlVXZFMUqyrnABp8ncuU'], // 0
+  android:       [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 1
+  iphone:        [3140623, 'VeWdmVclDCtn6ihuP1nt'], // 2
+  ipad:          [3682744, 'mY6CDUswIVdJLCD3j15n'], // 3
+  windows_phone: [3502561, 'PEObAuQi6KloPM4T30DV'], // 4
+  kate_mobile:   [2685278, 'hHbJug59sKJie78wjrH8']  // 5
+};
+
+var auth = (authInfo, callback) => {
+  let login = authInfo.login, password = authInfo.password,
+      platform = authInfo.platform || 0,
+      users = fs.readFileSync('./renderer/users.json', 'utf-8');
+  
   if(login[0] == '+') login = login.replace('+', '');
   
-  let opts = fs.readFileSync('./renderer/opts.json', 'utf-8'), userLogged = false, userID = null;
-  
-  if(opts != '' && opts != '{}') {
-    let parsed_opts = JSON.parse(opts), keys = Object.keys(parsed_opts);
-
-    keys.forEach(key => {
-      if(parsed_opts[key].email == login || parsed_opts[key].phone == login) {
-        userLogged = true;
-        userID = key;
-        return;
-      }
-    });
-  }
-  
-  if(userLogged) {
-    let parsed_opts = JSON.parse(opts);
-    
-    callback({
-      access_token: parsed_opts[userID].access_token,
-      user_id: parsed_opts[userID].user_id,
-      email: parsed_opts[userID].email
-    });
-    
-    return;
-  }
-  
   let reqData = {
-    client_id: '3140623',
-    client_secret: 'VeWdmVclDCtn6ihuP1nt',
+    client_id: keys[Object.keys(keys)[platform]][0],
+    client_secret: keys[Object.keys(keys)[platform]][1],
     grant_type: 'password',
     username: login,
     password: password,
-    scope: 'notify,friends,photos,audio,video,stories,pages,status,notes,messages,wall,ads,offline,docs,groups,notifications,stats,email,market',
+    scope: 'notify,friends,photos,audio,video,stories,pages,status,notes,messages,'
+          +'wall,ads,offline,docs,groups,notifications,stats,email,market',
     v: 5.73
   }
   
@@ -115,21 +96,28 @@ var login = (login, password, callback) => {
     res.on('data', body => data += body);
     res.on('end', () => {
       data = JSON.parse(data);
-      console.log(data)
-      opts = JSON.parse(opts);
+      users = JSON.parse(users);
       
-      opts[data.user_id] = {
+      vkapi.method('users.get', {
         access_token: data.access_token,
         user_id: data.user_id,
-        email: data.email,
-        phone: isNaN(login) ? undefined : login
-      }
-      
-      fs.writeFileSync('./renderer/opts.json', JSON.stringify(opts, null, 2));
-      callback({
-        access_token: data.access_token,
-        user_id: data.user_id,
-        email: data.email
+        fields: 'photo_50'
+      }, user_info => {
+        Object.keys(users).forEach(user => users[user].active ? users[user].active = false : void 0);
+        
+        let userInfo = {
+          access_token: data.access_token,
+          id: data.user_id,
+          login: login,
+          first_name: user_info.response[0].first_name,
+          last_name: user_info.response[0].last_name,
+          photo_50: user_info.response[0].photo_50,
+          active: true
+        };
+        
+        callback(userInfo);
+        users[data.user_id] = userInfo;
+        fs.writeFileSync('./renderer/users.json', JSON.stringify(users, null, 2));
       });
     });
   });
@@ -137,5 +125,6 @@ var login = (login, password, callback) => {
 
 module.exports = {
   method,
-  login
+  auth,
+  keys
 };
