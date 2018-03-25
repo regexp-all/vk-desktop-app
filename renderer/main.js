@@ -74,7 +74,7 @@ var login = () => {
       vkapi.auth({
         login: input_form.children[0].value,
         password: input_form.children[1].value,
-        platform: input_form.children[2].selectedIndex,
+        platform: [input_form.children[2].selectedIndex, input_form.children[2].value],
         v: 5.73
       }, data => {
         console.log(data);
@@ -83,7 +83,7 @@ var login = () => {
           wrapper_login.style.display = 'none';
           wrapper_content.style.display = 'block';
           
-          users = JSON.parse(users);
+          users = JSON.parse(fs.readFileSync('./renderer/users.json', 'utf-8'));
           let keys = Object.keys(users), user_id;
           keys.forEach(key => { if(users[key].active) user_id = key });
           
@@ -96,7 +96,7 @@ var login = () => {
     wrapper_login.style.display = 'none';
     wrapper_content.style.display = 'block';
     
-    users = JSON.parse(users);
+    users = JSON.parse(fs.readFileSync('./renderer/users.json', 'utf-8'));
     let keys = Object.keys(users), user_id;
     keys.forEach(key => { if(users[key].active) user_id = key });
     

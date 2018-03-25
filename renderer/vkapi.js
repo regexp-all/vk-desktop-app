@@ -69,7 +69,8 @@ var keys = {
   iphone:        [3140623, 'VeWdmVclDCtn6ihuP1nt'], // 1
   ipad:          [3682744, 'mY6CDUswIVdJLCD3j15n'], // 2
   windows:       [3697615, 'AlVXZFMUqyrnABp8ncuU'], // 3
-  kate_mobile:   [2685278, 'lxhD8OD7dMsqtXIm5IUY']  // 4
+  kate_mobile:   [2685278, 'lxhD8OD7dMsqtXIm5IUY'], // 4
+  vk_messenger:  [5027722, 'Skg1Tn1r2qEbbZIAJMx3']  // 5
 };
 
 var auth = (authInfo, callback) => {
@@ -80,8 +81,8 @@ var auth = (authInfo, callback) => {
   
   let reqData = {
     grant_type: 'password',
-    client_id: keys[Object.keys(keys)[platform]][0],
-    client_secret: keys[Object.keys(keys)[platform]][1],
+    client_id: keys[Object.keys(keys)[platform[0]]][0],
+    client_secret: keys[Object.keys(keys)[platform[0]]][1],
     username: login,
     password: password,
     //'2fa_supported': 1, // TODO: поддержка двухфакторки
@@ -126,6 +127,7 @@ var auth = (authInfo, callback) => {
         let userInfo = {
           access_token: data.access_token,
           id: data.user_id,
+          platform: platform,
           login: login,
           first_name: user_info.response[0].first_name,
           last_name: user_info.response[0].last_name,
@@ -133,9 +135,9 @@ var auth = (authInfo, callback) => {
           active: true
         };
         
-        callback(userInfo);
         users[data.user_id] = userInfo;
         fs.writeFileSync('./renderer/users.json', JSON.stringify(users, null, 2));
+        callback(userInfo);
       });
     });
   });
