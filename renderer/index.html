@@ -23,8 +23,25 @@
         </select>
         <input type="button" value="Войти" class='login_button' disabled>
       </div>
+      <div class="error_info" style='color: red;'></div>
       <div class="bottom_info">
-        Примечание: Авторизация еще не дописана.
+        Примечание: Двухфакторка пока не работает.
+      </div>
+      <div class="captcha_modal">
+        <div class="captcha">
+          <div class="captcha_header">
+            <div class="captcha_close"></div>
+          </div>
+          <div class="captcha_img">
+            <img>
+          </div>
+          <div class="captcha_key">
+            <input type="text" placeholder="Введите капчу">
+          </div>
+          <div class="captcha_btn">
+            <input type="button" value='Продолжить'>
+          </div>
+        </div>
       </div>
     </div>
     <div class="wrapper_content">

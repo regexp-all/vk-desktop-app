@@ -33,7 +33,7 @@ body {
 .wrapper_login, .wrapper_content { display: none }
 
 .wrapper_login {
-  height: 90vh;
+  height: 100vh;
   flex: 1 1 0;
   justify-content: center;
   align-items: center;
@@ -43,21 +43,21 @@ body {
 
 .login_title {
   font-size: 25px;
-  margin-top: 17px;
   font-weight: 400;
   color: rgb(26, 26, 26);
   text-align: center;
 }
 
-.input_form { margin: 28px auto 0 }
+.input_form { margin-top: 28px }
 ::-webkit-input-placeholder { color: rgb(147, 150, 153) }
 
-.input_form input {
+.input_form input, .captcha_key input {
   width: 250px;
   display: block;
   margin: 0 0 9px;
   outline: none;
   border: 1px solid rgb(210, 216, 222);
+  border-radius: 3px;
   background-color: rgb(255, 255, 255);
   font-size: 15px;
   color: rgb(60, 60, 60);
@@ -71,23 +71,93 @@ body {
   outline: none;
 }
 
-.input_form input[type=button] {
+.input_form input[type=button], .captcha_btn input {
   background-color: rgb(81, 129, 184);
   color: white;
   border-radius: 3px;
   border: none;
 }
 
-.input_form input[type=button]:hover {
+.input_form input[type=button]:hover, .captcha_btn input:hover {
   background-color: rgb(99, 139, 186);
 }
-.input_form input[type=button]:active {
+.input_form input[type=button]:active, .captcha_btn input:active {
   background-color: rgb(78, 123, 172)
 }
 
 .input_form input[type=button]:disabled {
   opacity: .5;
   background-color: rgb(81, 129, 184);
+}
+
+.captcha_modal {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  z-index: 47;
+  padding: 20px 0;
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, .3);
+  user-select: none;
+}
+
+.captcha {
+  height: 185px;
+  width: 300px;
+  border-radius: 5px;
+  user-select: auto;
+  background-color: #fcfcfc;
+  box-shadow: 0 2px 10px rgba(0,0,0,.35);
+}
+
+.captcha_header {
+  position: relative;
+  padding: 10px 0 0;
+  background: #fafbfc;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.captcha_close {
+  background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgdmlld0JveD0iMCAwIDE0IDE0Ij4KICA8cG9seWdvbiBmaWxsPSIjMDAwIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHBvaW50cz0iODgxLjU4NSAxODIuNzE3IDg4My4wNyAxODQuMjAzIDg4Ny44OTQgMTc5LjIyOSA4OTIuNzE3IDE4NC4yMDMgODk0LjIwMyAxODIuNzE3IDg4OS4yMjkgMTc3Ljg5NCA4OTQuMjAzIDE3My4wNyA4OTIuNzE3IDE3MS41ODUgODg3Ljg5NCAxNzYuNTU4IDg4My4wNyAxNzEuNTg1IDg4MS41ODUgMTczLjA3IDg4Ni41NTggMTc3Ljg5NCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTg4MSAtMTcxKSIgLz4KPC9zdmc+Cg==) center center no-repeat;
+  background-size: 16px 16px;
+  width: 35px;
+  height: 35px;
+  opacity: .3;
+  transition: opacity .2s;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.captcha_close:hover { opacity: .6 }
+
+.captcha_img {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.captcha_img img { border: 1px solid #dadada }
+
+.captcha_key {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.captcha_btn {
+  display: flex;
+  justify-content: center;
+  margin-top: 5px;
+}
+
+.captcha_btn input {
+  width: 250px;
+  height: 30px;
 }
 
 .tabs {

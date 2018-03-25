@@ -85,13 +85,15 @@ var auth = (authInfo, callback) => {
     client_secret: keys[Object.keys(keys)[platform[0]]][1],
     username: login,
     password: password,
-    //'2fa_supported': 1, // TODO: поддержка двухфакторки
     scope: 'notify,friends,photos,audio,video,docs,status,notes,pages,wall,groups,'
           +'messages,offline,notifications,stories,stats,ads,email,market',
-    v: authInfo.v || 5.71
+    v: authInfo.v || 5.73
   }
   
-  //if(authInfo.code) reqData.code = authInfo.code;
+  if(authInfo.captcha) {
+    reqData.captcha_sid = captcha[0];
+    reqData.captcha_key = captcha[1];
+  }
   
   let req = https.request({
     host: 'oauth.vk.com',
@@ -105,17 +107,13 @@ var auth = (authInfo, callback) => {
 
     res.on('data', body => data += body);
     res.on('end', () => {
-      
       data = JSON.parse(data);
       users = JSON.parse(users);
       
-      console.log(data);
-      
-      // if(data.validation_type == '2fa_sms') {
-      //   callback(data); // или ошибка аутентификации ^^^
-      //   // TODO: сделать двухфакторку
-      //   return;
-      // }
+      if(data.error) {
+        callback(data);
+        return;
+      }
       
       vkapi.method('users.get', {
         access_token: data.access_token,
