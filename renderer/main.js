@@ -50,18 +50,62 @@ var users = fs.readFileSync('./renderer/users.json', 'utf-8'),
     wrapper_login = document.querySelector('.wrapper_login'),
     wrapper_content = document.querySelector('.wrapper_content');
 
-if(users == '{}') {
-  wrapper_login.style.display = 'block';
-  // пустой файлик, нужно ввести данные в поле
-  // vkapi.auth login, password, platform
-} else {
-  wrapper_content.style.display = 'block';
-  
-  users = JSON.parse(users);
-  let keys = Object.keys(users), user_id;
-  keys.forEach(key => { if(users[key].active) user_id = key });
-  user = users[user_id];
-  
-  // user - инфа о юзере из users.json
-  // весь код, передача параметров другим функциям
+var login = () => {
+  if(users == '{}') {
+    let login_button = document.querySelector('.login_button'),
+        input_form = document.querySelector('.input_form');
+    
+    wrapper_login.style.display = 'flex';
+    
+    input_form.children[0].oninput = input_form.children[1].oninput = () => {
+      if(input_form.children[0].value.trim() != '' &&
+         input_form.children[1].value.trim() != '' &&
+         input_form.children[3].hasAttribute('disabled')) {
+        input_form.children[3].removeAttribute('disabled');
+      }
+      
+      if(input_form.children[0].value.trim() == '' ||
+         input_form.children[1].value.trim() == '') {
+        input_form.children[3].setAttribute('disabled', '');
+      }
+    }
+    
+    login_button.addEventListener('click', () => {
+      vkapi.auth({
+        login: input_form.children[0].value,
+        password: input_form.children[1].value,
+        platform: input_form.children[2].selectedIndex,
+        v: 5.73
+      }, data => {
+        console.log(data);
+        
+        if(data.access_token != undefined) {
+          wrapper_login.style.display = 'none';
+          wrapper_content.style.display = 'block';
+          
+          users = JSON.parse(users);
+          let keys = Object.keys(users), user_id;
+          keys.forEach(key => { if(users[key].active) user_id = key });
+          
+          startVK(users[user_id]);
+        }
+      });
+    });
+    
+  } else {
+    wrapper_login.style.display = 'none';
+    wrapper_content.style.display = 'block';
+    
+    users = JSON.parse(users);
+    let keys = Object.keys(users), user_id;
+    keys.forEach(key => { if(users[key].active) user_id = key });
+    
+    startVK(users[user_id])
+  }
 }
+
+var startVK = user => {
+  console.log(user);
+}
+
+login();

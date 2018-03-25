@@ -49,54 +49,72 @@ var method = (method, params, callback) => {
   params = params || {};
   params.v = params.v || 5.73;
   
-  https.get({
+  let req = https.request({
     host: 'api.vk.com',
-    path: `/method/${method}?${toURLString(params)}`
+    path: `/method/${method}?${toURLString(params)}`,
+    method: 'GET',
+    headers: { 'User-Agent': 'KateMobileAndroid' }
   }, res => {
     let body = '';
 
     res.on('data', chunk => body += chunk);
     res.on('end', () => callback(JSON.parse(body)));
   });
+  
+  req.end();
 }
 
 var keys = {
-  windows:       [3697615, 'AlVXZFMUqyrnABp8ncuU'], // 0
-  android:       [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 1
-  iphone:        [3140623, 'VeWdmVclDCtn6ihuP1nt'], // 2
-  ipad:          [3682744, 'mY6CDUswIVdJLCD3j15n'], // 3
-  windows_phone: [3502561, 'PEObAuQi6KloPM4T30DV'], // 4
-  kate_mobile:   [2685278, 'hHbJug59sKJie78wjrH8']  // 5
+  android:       [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 0
+  iphone:        [3140623, 'VeWdmVclDCtn6ihuP1nt'], // 1
+  ipad:          [3682744, 'mY6CDUswIVdJLCD3j15n'], // 2
+  windows:       [3697615, 'AlVXZFMUqyrnABp8ncuU'], // 3
+  kate_mobile:   [2685278, 'lxhD8OD7dMsqtXIm5IUY']  // 4
 };
 
 var auth = (authInfo, callback) => {
-  let login = authInfo.login, password = authInfo.password,
-      platform = authInfo.platform || 0,
+  let login = authInfo.login, password = authInfo.password, platform = authInfo.platform,
       users = fs.readFileSync('./renderer/users.json', 'utf-8');
   
   if(login[0] == '+') login = login.replace('+', '');
   
   let reqData = {
+    grant_type: 'password',
     client_id: keys[Object.keys(keys)[platform]][0],
     client_secret: keys[Object.keys(keys)[platform]][1],
-    grant_type: 'password',
     username: login,
     password: password,
-    scope: 'notify,friends,photos,audio,video,stories,pages,status,notes,messages,'
-          +'wall,ads,offline,docs,groups,notifications,stats,email,market',
-    v: 5.73
+    //'2fa_supported': 1, // TODO: поддержка двухфакторки
+    scope: 'notify,friends,photos,audio,video,docs,status,notes,pages,wall,groups,'
+          +'messages,offline,notifications,stories,stats,ads,email,market',
+    v: authInfo.v || 5.71
   }
   
-  https.get({
+  //if(authInfo.code) reqData.code = authInfo.code;
+  
+  let req = https.request({
     host: 'oauth.vk.com',
-    path: `/token/?${toURLString(reqData)}`
+    path: `/token/?${toURLString(reqData)}`,
+    method: 'GET',
+    headers: {
+      'User-Agent': 'KateMobileAndroid'
+    }
   }, res => {
     let data = '';
 
     res.on('data', body => data += body);
     res.on('end', () => {
+      
       data = JSON.parse(data);
       users = JSON.parse(users);
+      
+      console.log(data);
+      
+      // if(data.validation_type == '2fa_sms') {
+      //   callback(data); // или ошибка аутентификации ^^^
+      //   // TODO: сделать двухфакторку
+      //   return;
+      // }
       
       vkapi.method('users.get', {
         access_token: data.access_token,
@@ -121,6 +139,8 @@ var auth = (authInfo, callback) => {
       });
     });
   });
+  
+  req.end();
 };
 
 module.exports = {

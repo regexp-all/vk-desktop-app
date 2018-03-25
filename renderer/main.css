@@ -25,12 +25,70 @@
 * { box-sizing: border-box }
 
 body {
-  font-family: 'Lucida Grande', 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
+  font-family: 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
   font-size: 14px;
   margin: 0;
 }
 
 .wrapper_login, .wrapper_content { display: none }
+
+.wrapper_login {
+  height: 90vh;
+  flex: 1 1 0;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.login_title {
+  font-size: 25px;
+  margin-top: 17px;
+  font-weight: 400;
+  color: rgb(26, 26, 26);
+  text-align: center;
+}
+
+.input_form { margin: 28px auto 0 }
+::-webkit-input-placeholder { color: rgb(147, 150, 153) }
+
+.input_form input {
+  width: 250px;
+  display: block;
+  margin: 0 0 9px;
+  outline: none;
+  border: 1px solid rgb(210, 216, 222);
+  background-color: rgb(255, 255, 255);
+  font-size: 15px;
+  color: rgb(60, 60, 60);
+  line-height: 32px;
+  padding: 0 9px;
+  transition: .3s all;
+}
+
+.platform {
+  margin-bottom: 9px;
+  outline: none;
+}
+
+.input_form input[type=button] {
+  background-color: rgb(81, 129, 184);
+  color: white;
+  border-radius: 3px;
+  border: none;
+}
+
+.input_form input[type=button]:hover {
+  background-color: rgb(99, 139, 186);
+}
+.input_form input[type=button]:active {
+  background-color: rgb(78, 123, 172)
+}
+
+.input_form input[type=button]:disabled {
+  opacity: .5;
+  background-color: rgb(81, 129, 184);
+}
 
 .tabs {
   background: #fafbfc;
