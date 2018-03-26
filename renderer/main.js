@@ -151,6 +151,9 @@ var login = () => {
             
 var startVK = (users, user) => {
   console.log(user);
+  vkapi.method('audio.get', {
+    access_token: user.access_token
+  }, data => console.log(data));
 }
 
 login();

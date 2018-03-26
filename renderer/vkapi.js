@@ -45,16 +45,40 @@ const https = require('https');
 const fs = require('fs');
 const toURLString = require('querystring').stringify;
 const { getCurrentWindow } = require('electron').remote;
+const md5 = require('./md5');
 
 var method = (method, params, callback) => {
   params = params || {};
   params.v = params.v || 5.73;
   
+  let secret = '';
+  
+  if(params.secret) {
+    secret = params.secret;
+    delete params.secret;
+  } else {
+    let users = fs.readFileSync('./renderer/users.json', 'utf-8'), active_user;
+    users = JSON.parse(users);
+    
+    Object.keys(users).forEach(user_id => {
+      if(users[user_id].active == true) {
+        active_user = users[user_id];
+      }
+    });
+    
+    secret = active_user.secret;
+  }
+  
+  params.sig = md5('/method/'+method+'?'+toURLString(params)+secret);
+  
   let req = https.request({
     host: 'api.vk.com',
     path: `/method/${method}?${toURLString(params)}`,
     method: 'GET',
-    headers: { 'User-Agent': 'KateMobileAndroid' }
+    headers: {
+      'User-Agent': 'VKAndroidApp/4.8.3-1113'
+      //'User-Agent': 'KateMobileAndroid'
+    }
   }, res => {
     let body = '';
 
@@ -62,20 +86,20 @@ var method = (method, params, callback) => {
     res.on('end', () => {
       body = JSON.parse(body);
       
-      if(body.error) { // user authorization failed (когда сменил пароль или поставил двухфакторку)
-        if(body.error.error_code == 5) {
-          let users = JSON.parse(fs.readFileSync('./renderer/users.json', 'utf-8'));
-        
-          Object.keys(users).forEach(user_id => {
-            if(users[user_id].access_token == params.access_token) {
-              delete users[user_id];
-              fs.writeFileSync('./renderer/users.json', JSON.stringify(users, null, 2));
-              getCurrentWindow().reload();
-              return;
-            }
-          });
-        }
-      }
+      // if(body.error) { // user authorization failed (когда сменил пароль или поставил двухфакторку)
+      //   if(body.error.error_code == 5) {
+      //     let users = JSON.parse(fs.readFileSync('./renderer/users.json', 'utf-8'));
+      // 
+      //     Object.keys(users).forEach(user_id => {
+      //       if(users[user_id].access_token == params.access_token) {
+      //         delete users[user_id];
+      //         fs.writeFileSync('./renderer/users.json', JSON.stringify(users, null, 2));
+      //         getCurrentWindow().reload();
+      //         return;
+      //       }
+      //     });
+      //   }
+      // }
       
       callback(body);
     });
@@ -105,8 +129,8 @@ var auth = (authInfo, callback) => {
     client_secret: keys[Object.keys(keys)[platform[0]]][1],
     username: login,
     password: password,
-    scope: 'notify,friends,photos,audio,video,docs,status,notes,pages,wall,groups,'
-          +'messages,offline,notifications,stories,stats,ads,email,market',
+    scope: 'nohttps,all',
+    // libverify_support: 1,
     '2fa_supported': true,
     v: authInfo.v || 5.73
   }
@@ -118,11 +142,17 @@ var auth = (authInfo, callback) => {
   
   if(authInfo.code) reqData.code = authInfo.code;
   
+  console.log('0');
+  console.log(reqData);
+  
   let req = https.request({
     host: 'oauth.vk.com',
     path: `/token/?${toURLString(reqData)}`,
     method: 'GET',
-    headers: { 'User-Agent': 'KateMobileAndroid' }
+    headers: {
+      'User-Agent': 'VKAndroidApp/4.8.3-1113'
+      //'User-Agent': 'KateMobileAndroid'
+    }
   }, res => {
     let data = '';
 
@@ -131,33 +161,68 @@ var auth = (authInfo, callback) => {
       data = JSON.parse(data);
       users = JSON.parse(users);
       
+      console.log('1');
+      console.log(data);
+      
       if(data.error) {
         callback(data);
         return;
       }
       
+      
+      /*
+      v=5.68
+      &
+      lang=ru
+      &
+      https=1
+      &
+      receipt=JSv5FBbXbY:APA91bF2K9B0eh61f2WaTZvm62GOHon3-vElmVq54ZOL5PHpFkIc85WQUxUH_wae8YEUKkEzLCcUC5V4bTWNNPbjTxgZRvQ-PLONDMZWo_6hwiqhlMM7gIZHM2K2KhvX-9oCcyD1ERw4&access_token=17ef24ca8af17ade4621712401d7b57299738f6c85f3dcd09b9e7132ed0b501d49dca0337c790c514ab65&sig=45b941684669a7163a8ce4d658671260
+      */
+      
+      // Писать "Получение информации и пользователе"
+      
       vkapi.method('users.get', {
         access_token: data.access_token,
         user_id: data.user_id,
-        fields: 'photo_50'
+        secret: data.secret,
+        fields: 'photo_50',
+        v: 5.73
       }, user_info => {
         Object.keys(users).forEach(user => users[user].active ? users[user].active = false : void 0);
         
-        let userInfo = {
+        console.log('2');
+        console.log(user_info);
+        // user data
+        // Писать получение токена для музыки
+        vkapi.method('auth.refreshToken', {
           access_token: data.access_token,
-          id: data.user_id,
-          platform: platform,
-          login: login,
-          first_name: user_info.response[0].first_name,
-          last_name: user_info.response[0].last_name,
-          photo_50: user_info.response[0].photo_50,
-          active: true
-        };
-        
-        users[data.user_id] = userInfo;
-        fs.writeFileSync('./renderer/users.json', JSON.stringify(users, null, 2));
-        
-        callback(userInfo);
+          secret: data.secret,
+          receipt: 'JSv5FBbXbY:APA91bF2K9B0eh61f2WaTZvm62GOHon3-vElmVq54ZOL5PHpFkIc85WQUxUH_wae8YEUKkEzLCcUC5V4bTWNNPbjTxgZRvQ-PLONDMZWo_6hwiqhlMM7gIZHM2K2KhvX-9oCcyD1ERw4',
+          v: 5.73
+        }, ref_data => {
+          // refreshToken
+          
+          console.log('3');
+          console.log(ref_data);
+          
+          let userInfo = {
+            access_token: ref_data.response.token,
+            id: data.user_id,
+            platform: platform,
+            login: login,
+            secret: ref_data.response.secret,
+            first_name: user_info.response[0].first_name,
+            last_name: user_info.response[0].last_name,
+            photo_50: user_info.response[0].photo_50,
+            active: true
+          };
+          
+          users[data.user_id] = userInfo;
+          fs.writeFileSync('./renderer/users.json', JSON.stringify(users, null, 2));
+          
+          callback(userInfo);
+        })
       });
     });
   });
