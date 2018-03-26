@@ -44,6 +44,7 @@ UFT_VIDEO:              ['video_file', 'video.save']
 const https = require('https');
 const fs = require('fs');
 const toURLString = require('querystring').stringify;
+const { getCurrentWindow } = require('electron').remote;
 
 var method = (method, params, callback) => {
   params = params || {};
@@ -58,7 +59,26 @@ var method = (method, params, callback) => {
     let body = '';
 
     res.on('data', chunk => body += chunk);
-    res.on('end', () => callback(JSON.parse(body)));
+    res.on('end', () => {
+      body = JSON.parse(body);
+      
+      if(body.error) { // user authorization failed (когда сменил пароль или поставил двухфакторку)
+        if(body.error.error_code == 5) {
+          let users = JSON.parse(fs.readFileSync('./renderer/users.json', 'utf-8'));
+        
+          Object.keys(users).forEach(user_id => {
+            if(users[user_id].access_token == params.access_token) {
+              delete users[user_id];
+              fs.writeFileSync('./renderer/users.json', JSON.stringify(users, null, 2));
+              getCurrentWindow().reload();
+              return;
+            }
+          });
+        }
+      }
+      
+      callback(body);
+    });
   });
   
   req.end();
@@ -87,21 +107,22 @@ var auth = (authInfo, callback) => {
     password: password,
     scope: 'notify,friends,photos,audio,video,docs,status,notes,pages,wall,groups,'
           +'messages,offline,notifications,stories,stats,ads,email,market',
+    '2fa_supported': true,
     v: authInfo.v || 5.73
   }
   
-  if(authInfo.captcha) {
+  if(authInfo.captcha[0]) {
     reqData.captcha_sid = captcha[0];
     reqData.captcha_key = captcha[1];
   }
+  
+  if(authInfo.code) reqData.code = authInfo.code;
   
   let req = https.request({
     host: 'oauth.vk.com',
     path: `/token/?${toURLString(reqData)}`,
     method: 'GET',
-    headers: {
-      'User-Agent': 'KateMobileAndroid'
-    }
+    headers: { 'User-Agent': 'KateMobileAndroid' }
   }, res => {
     let data = '';
 
@@ -135,6 +156,7 @@ var auth = (authInfo, callback) => {
         
         users[data.user_id] = userInfo;
         fs.writeFileSync('./renderer/users.json', JSON.stringify(users, null, 2));
+        
         callback(userInfo);
       });
     });
@@ -143,8 +165,24 @@ var auth = (authInfo, callback) => {
   req.end();
 };
 
+var longPoll = (opts, callback) => {
+  let options = {
+    act: 'a_check',
+    key: opts.key,
+    ts: opts.ts,
+    wait: opts.wait || 25,
+    mode: opts.mode || 2,
+    version: opts.version || 2
+  }
+  
+  https.get(`https://${opts.server}?${toURLString(options)}`, data => {
+    console.log(data);
+  });
+};
+
 module.exports = {
   method,
   auth,
-  keys
+  keys//,
+  //longPoll
 };

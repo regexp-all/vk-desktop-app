@@ -12,7 +12,7 @@
       <div class="input_form">
         <input type="text" placeholder="Введите логин">
         <input type="password" placeholder="Введите пароль">
-        Выберите платформу:
+        Платформа:
         <select class='platform'>
           <option>Android</option>
           <option>iPhone</option>
@@ -21,43 +21,29 @@
           <option>Kate Mobile</option>
           <option>VK Messenger</option>
         </select>
+        <input type="text" placeholder="Введите код из смс" class='sms_code' style='display: none'>
         <input type="button" value="Войти" class='login_button' disabled>
       </div>
       <div class="error_info" style='color: red;'></div>
       <div class="bottom_info">
-        Примечание: Двухфакторка пока не работает.
-      </div>
+        При возникновении проблем пишите <a href='https://vk.com/danyadev'>сюда</a>
+        </div>
+      <!-- модальное окно для капчи -->
       <div class="captcha_modal">
         <div class="captcha">
-          <div class="captcha_header">
-            <div class="captcha_close"></div>
-          </div>
-          <div class="captcha_img">
-            <img>
-          </div>
-          <div class="captcha_key">
-            <input type="text" placeholder="Введите капчу">
-          </div>
-          <div class="captcha_btn">
-            <input type="button" value='Продолжить'>
-          </div>
+          <div class="captcha_header"><div class="captcha_close"></div></div>
+          <div class="captcha_img"><img></div>
+          <div class="captcha_key"><input type="text" placeholder="Введите капчу"></div>
+          <div class="captcha_btn"><input type="button" value='Продолжить'></div>
         </div>
       </div>
     </div>
     <div class="wrapper_content">
       <div class="tabs">
-        <div class="tab">Список аккаунтов</div>
-        <div class="tab">Моя страница</div>
-        <div class="tab">Новости</div>
         <div class="tab">Сообщения</div>
-        <div class="tab">Настройки</div>
       </div>
       <div class="content">
-        <div class="tab_content">Список аккаунтов</div>
-        <div class="tab_content">Моя страница</div>
-        <div class="tab_content">Новости</div>
         <div class="tab_content">Сообщения</div>
-        <div class="tab_content">Настройки</div>
       </div>
     </div>
   </body>

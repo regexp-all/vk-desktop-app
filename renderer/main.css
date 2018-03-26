@@ -51,7 +51,7 @@ body {
 .input_form { margin-top: 28px }
 ::-webkit-input-placeholder { color: rgb(147, 150, 153) }
 
-.input_form input, .captcha_key input {
+.input_form input, .captcha_key input, .platform {
   width: 250px;
   display: block;
   margin: 0 0 9px;
@@ -66,9 +66,20 @@ body {
   transition: .3s all;
 }
 
+.input_form input:hover, .captcha_key input:hover, .platform:hover {
+  border: 1px solid rgb(162, 165, 168);
+}
+
+.input_form input:focus, .captcha_key input:focus, .platform:focus {
+  border: 1px solid rgb(126, 127, 127);
+}
+
 .platform {
   margin-bottom: 9px;
   outline: none;
+  width: 170px;
+  display: inline-block;
+  height: 30px
 }
 
 .input_form input[type=button], .captcha_btn input {

@@ -43,6 +43,16 @@ content.children[0].classList.add('content_active');
   });
 });
 
+const { shell } = require('electron').remote;
+
+// все ссылки будут открываться в браузере по умолчанию
+document.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    shell.openExternal(e.target.href);
+  });
+});
+
 const fs = require('fs');
 const vkapi = require('./vkapi');
 
@@ -54,7 +64,10 @@ var users = fs.readFileSync('./renderer/users.json', 'utf-8'),
     captcha_close = document.querySelector('.captcha_close'),
     captcha_btn = document.querySelector('.captcha_btn input'),
     captcha_key = document.querySelector('.captcha_key input'),
-    captcha = [];
+    login_button = document.querySelector('.login_button'),
+    input_form = document.querySelector('.input_form'),
+    sms_code = document.querySelector('.sms_code'),
+    captcha = [], code;
     
 captcha_close.addEventListener('click', () => {
   captcha_modal.style.display = 'none';
@@ -63,21 +76,18 @@ captcha_close.addEventListener('click', () => {
 
 var login = () => {
   if(users == '{}') {
-    let login_button = document.querySelector('.login_button'),
-        input_form = document.querySelector('.input_form');
-    
     wrapper_login.style.display = 'flex';
     
     input_form.children[0].oninput = input_form.children[1].oninput = () => {
-      if(input_form.children[0].value.trim() != '' &&
-         input_form.children[1].value.trim() != '' &&
-         input_form.children[3].hasAttribute('disabled')) {
-        input_form.children[3].removeAttribute('disabled');
+      if(input_form.children[0].value.trim() != '' && // логин
+         input_form.children[1].value.trim() != '' && // пароль
+         login_button.hasAttribute('disabled')) {
+        login_button.removeAttribute('disabled');
       }
       
-      if(input_form.children[0].value.trim() == '' ||
-         input_form.children[1].value.trim() == '') {
-        input_form.children[3].setAttribute('disabled', '');
+      if(input_form.children[0].value.trim() == '' || // логин
+         input_form.children[1].value.trim() == '') { // пароль
+        login_button.setAttribute('disabled', '');
       }
     }
     
@@ -92,12 +102,10 @@ var login = () => {
         password: input_form.children[1].value,
         platform: [input_form.children[2].selectedIndex, input_form.children[2].value],
         captcha: captcha,
+        code: sms_code.value,
         v: 5.73
       }, data => {
-        console.log(data);
-        
         if(data.error) {
-          console.log(data);
           error_info.innerHTML = data.error_description || data.error || 'Неизвестная ошибка';
             
           if(data.error == 'need_captcha') {
@@ -106,6 +114,11 @@ var login = () => {
             captcha_img.children[0].src = data.captcha_img;
             captcha_modal.style.display = 'flex';
             captcha[0] = data.captcha_sid;
+          }
+          
+          if(data.error == 'need_validation') {
+            sms_code.style.display = 'block';
+            error_info.innerHTML += `<br>Смс придет на номер ${data.phone_mask}`;
           }
           
           return;
@@ -119,7 +132,7 @@ var login = () => {
         let keys = Object.keys(users), user_id;
         keys.forEach(key => { if(users[key].active) user_id = key });
         
-        startVK(users[user_id]);
+        startVK(users, users[user_id]);
       });
     };
     
@@ -132,11 +145,11 @@ var login = () => {
     let keys = Object.keys(users), user_id;
     keys.forEach(key => { if(users[key].active) user_id = key });
     
-    startVK(users[user_id])
+    startVK(users, users[user_id])
   }
 }
-
-var startVK = user => {
+            
+var startVK = (users, user) => {
   console.log(user);
 }
 
