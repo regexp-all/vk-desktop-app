@@ -24,7 +24,8 @@
 
 'use strict';
 
-// Методы для получения серверов для загрузки и самой загрузки файлов
+// Методы для получения серверов для загрузки и самой загрузки файлов (TODO)
+// истории: https://vk.com/blog/stories-api
 /*                      [upload_field_name, step_one_method_name, step_two_method_name]
 
 UFT_AUDIO:              ['file', 'audio.getUploadServer', 'audio.save'],
@@ -47,31 +48,37 @@ const toURLString = require('querystring').stringify;
 const { getCurrentWindow } = require('electron').remote;
 const md5 = require('./md5');
 
+var keys = {
+  android:       [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 0
+  iphone:        [3140623, 'VeWdmVclDCtn6ihuP1nt'], // 1
+  ipad:          [3682744, 'mY6CDUswIVdJLCD3j15n'], // 2
+  windows:       [3697615, 'AlVXZFMUqyrnABp8ncuU'], // 3
+  kate_mobile:   [2685278, 'lxhD8OD7dMsqtXIm5IUY']  // 4
+};
+
 var method = (method, params, callback) => {
   params = params || {};
   params.v = params.v || 5.73;
-  
-  let secret = '';
+  let secret;
   
   if(params.secret) {
     secret = params.secret;
     delete params.secret;
+    console.log(params);
   } else {
     let users = fs.readFileSync('./renderer/users.json', 'utf-8'), active_user;
     users = JSON.parse(users);
     
     Object.keys(users).forEach(user_id => {
-      if(users[user_id].active == true) {
-        active_user = users[user_id];
-      }
+      if(users[user_id].active) active_user = users[user_id];
     });
     
     secret = active_user.secret;
   }
   
-  params.sig = md5('/method/'+method+'?'+toURLString(params)+secret);
+  params.sig = md5('/method/' + method + '?' + toURLString(params) + secret);
   
-  let req = https.request({
+  https.request({
     host: 'api.vk.com',
     path: `/method/${method}?${toURLString(params)}`,
     method: 'GET',
@@ -86,73 +93,42 @@ var method = (method, params, callback) => {
     res.on('end', () => {
       body = JSON.parse(body);
       
-      // if(body.error) { // user authorization failed (когда сменил пароль или поставил двухфакторку)
-      //   if(body.error.error_code == 5) {
-      //     let users = JSON.parse(fs.readFileSync('./renderer/users.json', 'utf-8'));
-      // 
-      //     Object.keys(users).forEach(user_id => {
-      //       if(users[user_id].access_token == params.access_token) {
-      //         delete users[user_id];
-      //         fs.writeFileSync('./renderer/users.json', JSON.stringify(users, null, 2));
-      //         getCurrentWindow().reload();
-      //         return;
-      //       }
-      //     });
-      //   }
-      // }
+      if(body.error) {} // ошибка, чо (TODO)
       
       callback(body);
     });
-  });
-  
-  req.end();
+  }).end();
 }
 
-var keys = {
-  android:       [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 0
-  iphone:        [3140623, 'VeWdmVclDCtn6ihuP1nt'], // 1
-  ipad:          [3682744, 'mY6CDUswIVdJLCD3j15n'], // 2
-  windows:       [3697615, 'AlVXZFMUqyrnABp8ncuU'], // 3
-  kate_mobile:   [2685278, 'lxhD8OD7dMsqtXIm5IUY'], // 4
-  vk_messenger:  [5027722, 'Skg1Tn1r2qEbbZIAJMx3']  // 5
-};
-
 var auth = (authInfo, callback) => {
-  let login = authInfo.login, password = authInfo.password, platform = authInfo.platform,
-      users = fs.readFileSync('./renderer/users.json', 'utf-8');
+  let users = fs.readFileSync('./renderer/users.json', 'utf-8');
   
-  if(login[0] == '+') login = login.replace('+', '');
+  if(authInfo.login[0] == '+') login = login.replace('+', '');
   
   let reqData = {
     grant_type: 'password',
-    client_id: keys[Object.keys(keys)[platform[0]]][0],
-    client_secret: keys[Object.keys(keys)[platform[0]]][1],
-    username: login,
-    password: password,
+    client_id: keys[Object.keys(keys)[authInfo.platform[0]]][0],
+    client_secret: keys[Object.keys(keys)[authInfo.platform[0]]][1],
+    username: authInfo.login,
+    password: authInfo.password,
     scope: 'nohttps,all',
-    // libverify_support: 1,
     '2fa_supported': true,
     v: authInfo.v || 5.73
   }
   
-  if(authInfo.captcha[0]) {
-    reqData.captcha_sid = captcha[0];
-    reqData.captcha_key = captcha[1];
+  if(authInfo.captcha_sid && authInfo.captcha_key) {
+    reqData.captcha_sid = authInfo.captcha_sid;
+    reqData.captcha_key = authInfo.captcha_key;
   }
   
   if(authInfo.code) reqData.code = authInfo.code;
   
-  console.log('0');
   console.log(reqData);
   
-  let req = https.request({
+  https.request({
     host: 'oauth.vk.com',
     path: `/token/?${toURLString(reqData)}`,
-    method: 'GET',
-    headers: {
-      'User-Agent': 'VKAndroidApp/4.8.3-1113'
-      //'User-Agent': 'KateMobileAndroid'
-    }
+    method: 'GET'
   }, res => {
     let data = '';
 
@@ -161,24 +137,12 @@ var auth = (authInfo, callback) => {
       data = JSON.parse(data);
       users = JSON.parse(users);
       
-      console.log('1');
       console.log(data);
       
       if(data.error) {
         callback(data);
         return;
       }
-      
-      
-      /*
-      v=5.68
-      &
-      lang=ru
-      &
-      https=1
-      &
-      receipt=JSv5FBbXbY:APA91bF2K9B0eh61f2WaTZvm62GOHon3-vElmVq54ZOL5PHpFkIc85WQUxUH_wae8YEUKkEzLCcUC5V4bTWNNPbjTxgZRvQ-PLONDMZWo_6hwiqhlMM7gIZHM2K2KhvX-9oCcyD1ERw4&access_token=17ef24ca8af17ade4621712401d7b57299738f6c85f3dcd09b9e7132ed0b501d49dca0337c790c514ab65&sig=45b941684669a7163a8ce4d658671260
-      */
       
       // Писать "Получение информации и пользователе"
       
@@ -191,7 +155,6 @@ var auth = (authInfo, callback) => {
       }, user_info => {
         Object.keys(users).forEach(user => users[user].active ? users[user].active = false : void 0);
         
-        console.log('2');
         console.log(user_info);
         // user data
         // Писать получение токена для музыки
@@ -203,20 +166,20 @@ var auth = (authInfo, callback) => {
         }, ref_data => {
           // refreshToken
           
-          console.log('3');
-          console.log(ref_data);
-          
           let userInfo = {
             access_token: ref_data.response.token,
             id: data.user_id,
-            platform: platform,
-            login: login,
+            platform: authInfo.platform,
+            login: authInfo.login,
             secret: ref_data.response.secret,
             first_name: user_info.response[0].first_name,
             last_name: user_info.response[0].last_name,
             photo_50: user_info.response[0].photo_50,
             active: true
           };
+          
+          console.log(userInfo);
+          console.log(ref_data);
           
           users[data.user_id] = userInfo;
           fs.writeFileSync('./renderer/users.json', JSON.stringify(users, null, 2));
@@ -225,22 +188,20 @@ var auth = (authInfo, callback) => {
         })
       });
     });
-  });
-  
-  req.end();
+  }).end();
 };
 
-var longPoll = (opts, callback) => {
+var longpoll = (params, callback) => {
   let options = {
     act: 'a_check',
-    key: opts.key,
-    ts: opts.ts,
-    wait: opts.wait || 25,
-    mode: opts.mode || 2,
-    version: opts.version || 2
+    key: params.key,
+    ts: params.ts,
+    wait: params.wait || 25,
+    mode: params.mode || 2,
+    version: params.version || 2
   }
   
-  https.get(`https://${opts.server}?${toURLString(options)}`, data => {
+  https.get(`https://${params.server}?${toURLString(options)}`, data => {
     console.log(data);
   });
 };
@@ -248,6 +209,6 @@ var longPoll = (opts, callback) => {
 module.exports = {
   method,
   auth,
-  keys//,
-  //longPoll
+  keys,
+  longpoll
 };
