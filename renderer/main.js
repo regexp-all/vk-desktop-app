@@ -67,11 +67,23 @@ var users = fs.readFileSync('./renderer/users.json', 'utf-8'),
     login_button = document.querySelector('.login_button'),
     input_form = document.querySelector('.input_form'),
     sms_code = document.querySelector('.sms_code'),
+    show_password = document.querySelector('.show_password'),
+    password_input = document.querySelector('.password_input input'),
     captcha = [], code;
     
 captcha_close.addEventListener('click', () => {
   captcha_modal.style.display = 'none';
   error_info.innerHTML = '';
+});
+
+show_password.addEventListener('click', () => {
+  if([].slice.call(show_password.classList).indexOf('active') != -1) {
+    show_password.classList.remove('active');
+    password_input.type = 'password';
+  } else {
+    show_password.classList.add('active');
+    password_input.type = 'text';
+  }
 });
 
 var login = () => {
