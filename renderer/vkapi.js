@@ -46,7 +46,6 @@ const https = require('https');
 const fs = require('fs');
 const toURLString = require('querystring').stringify;
 const { getCurrentWindow } = require('electron').remote;
-const md5 = require('./md5');
 
 var keys = [
   [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 0 Android
@@ -56,6 +55,8 @@ var keys = [
   [2685278, 'lxhD8OD7dMsqtXIm5IUY'], // 4 Kate Mobile
   [5027722, 'Skg1Tn1r2qEbbZIAJMx3']  // 5 VK Messenger
 ];
+
+var md5 = data => require('crypto').createHash('md5').update(data).digest("hex");
 
 var method = (method, params, callback) => {
   params = params || {};
@@ -193,18 +194,6 @@ var refreshToken = (data, callback) => {
     v: 5.73
   }, ref => callback({ access_token: ref.response.token, secret: ref.response.secret }))
 };
-
-// var getUserInfo = (data, callback) => {
-//   vkapi.method('users.get', {
-//     access_token: data.access_token,
-//     user_id: data.user_id,
-//     secret: data.secret,
-//     fields: 'photo_50',
-//     v: 5.73
-//   }, user_info => {
-//     // callback
-//   });
-// }
 
 var longpoll = (params, callback) => {
   let options = {
