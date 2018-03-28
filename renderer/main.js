@@ -59,10 +59,8 @@ document.querySelectorAll('a').forEach(link => {
 
 // функция, которая запускает все части клиента
 var startVK = (users, user) => {
-  console.log(user);
-  vkapi.method('audio.get', { // и это работает :)
-    access_token: user.access_token
-  }, data => console.log(data));
+  // пока я вызываю audio, т.к. есть только 1 пункт
+  require('./audio')(user);
 }
 
 if(Object.keys(users).length >= 1) { // если есть хоть 1 юзер, то идем дальше

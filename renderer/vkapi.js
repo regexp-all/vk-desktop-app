@@ -44,7 +44,7 @@ UFT_VIDEO:              ['video_file', 'video.save']
 
 const https = require('https');
 const fs = require('fs');
-const toURLString = require('querystring').stringify;
+const querystring = require('querystring');
 const { getCurrentWindow } = require('electron').remote;
 
 var keys = [
@@ -54,9 +54,10 @@ var keys = [
   [3697615, 'AlVXZFMUqyrnABp8ncuU'], // 3 Windows
   [2685278, 'lxhD8OD7dMsqtXIm5IUY'], // 4 Kate Mobile
   [5027722, 'Skg1Tn1r2qEbbZIAJMx3']  // 5 VK Messenger
-];
-
-var md5 = data => require('crypto').createHash('md5').update(data).digest("hex");
+],
+    toURL = obj => querystring.unescape(querystring.stringify(obj)),
+    md5 = data => require('crypto').createHash('md5').update(data).digest("hex"),
+    online_methods = ['account.setOnline', 'account.setOffline']; // возможно добавлю еще
 
 var method = (method, params, callback) => {
   params = params || {};
@@ -71,16 +72,18 @@ var method = (method, params, callback) => {
   if(params.secret) {
     secret = params.secret;
     delete params.secret;
-  } else if(method == 'account.setOnline' || method == 'account.setOffline') {
-    //secret = active_user.online.secret;
-    secret = active_user.secret;
+  } else if(online_methods.indexOf(method) != -1) {
+    secret = active_user.online.secret;
+    if(!params.access_token) params.access_token = active_user.online.access_token;
   } else secret = active_user.secret;
   
-  params.sig = md5('/method/' + method + '?' + toURLString(params) + secret);
+  if(!params.access_token) params.access_token = active_user.access_token;
+  
+  params.sig = md5('/method/' + method + '?' + toURL(params) + secret);
   
   https.request({
     host: 'api.vk.com',
-    path: `/method/${method}?${toURLString(params)}`,
+    path: `/method/${method}?${toURL(params)}`,
     method: 'GET',
     headers: { 'User-Agent': 'VKAndroidApp/4.13.1-1206' }
   }, res => {
@@ -125,7 +128,7 @@ var auth = (authInfo, callback) => {
   
   https.request({
     host: 'oauth.vk.com',
-    path: `/token/?${toURLString(reqData)}`,
+    path: `/token/?${toURL(reqData)}`,
     method: 'GET'
   }, res => {
     let data = '';
@@ -205,7 +208,7 @@ var longpoll = (params, callback) => {
     version: params.version || 2
   }
   
-  https.get(`https://${params.server}?${toURLString(options)}`, data => {
+  https.get(`https://${params.server}?${toURL(options)}`, data => {
     console.log(data);
   });
 };
