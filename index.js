@@ -27,8 +27,7 @@ process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
 
 const { app, BrowserWindow } = require('electron');
 
-try { // это находится за пределами моего проекта и используется всеми другими моими проектами.
-      // так сделано чтобы в node_modules небыло лишних вещей
+try {
   require('./../reload/node_modules/electron-reload')(__dirname, {
     ignored: [
       __dirname + '/.git',
@@ -44,16 +43,14 @@ try { // это находится за пределами моего проек
 })} catch(e){}
 
 app.on('window-all-closed', () => {
-  if(process.platform !== 'darwin'){
-    app.quit();
-  }
+  if(process.platform != 'darwin') app.quit();
 });
 
 app.on('ready', () => {
   win = new BrowserWindow({
     width: 720,
     height: 480,
-    minWidth: 720,
+    minWidth: 380,
     minHeight: 480,
     show: false
   });

@@ -10,32 +10,26 @@
     <div class="wrapper_login">
       <div class="login_title">ВКонтакте</div>
       <div class="input_form">
-        <input type="text" placeholder="Введите логин">
+        <input type="text" placeholder="Введите логин" class='login_input'>
         <div class="password_input">
           <div class="show_password"></div>
           <input type="password" placeholder="Введите пароль">
         </div>
-        Платформа:
-        <select class='platform'>
-          <option>Android</option>
-          <option disabled>iPhone</option>
-          <option disabled>iPad</option>
-          <option disabled>Windows</option>
-          <option disabled>Kate Mobile</option>
-        </select>
         <input type="text" placeholder="Введите код из смс" class='sms_code_input' style='display: none'>
         <input type="button" value="Войти" class='login_button' disabled>
       </div>
       <div class="error_info" style='color: red;'></div>
       <div class="bottom_info">
-        При возникновении проблем пишите <a href='https://vk.com/danyadev'>сюда</a><br>
-        Пока пишется авторизация.
+        При возникновении проблем пишите <a href='https://vk.com/danyadev'>сюда</a>.<br><br>
+        Платфрома по умолчанию - Android.<br>
+        Ее можно изменить в настройках.
       </div>
       <!-- модальное окно для капчи -->
       <div class="captcha_modal">
         <div class="captcha">
           <div class="captcha_header"><div class="captcha_close"></div></div>
           <div class="captcha_img"><img></div>
+          <div class="captcha_info">Не видно? Нажмите на картинку</div>
           <div class="captcha_key"><input type="text" placeholder="Введите капчу"></div>
           <div class="captcha_btn"><input type="button" value='Продолжить'></div>
         </div>

@@ -65,7 +65,7 @@ var startVK = (users, user) => {
   }, data => console.log(data));
 }
 
-if(Object.keys(users).length >= 1) { // есть хоть 1 юзер, просто передаем данные дальше
+if(Object.keys(users).length >= 1) { // если есть хоть 1 юзер, то идем дальше
   wrapper_login.style.display = 'none';
   wrapper_content.style.display = 'block';
   
@@ -75,6 +75,7 @@ if(Object.keys(users).length >= 1) { // есть хоть 1 юзер, прост
   startVK(users, users[user_id]);
 } else { // если нет, то вставляем форму авторизации
   let input_form = document.querySelector('.input_form'),
+      login_input = document.querySelector('.login_input'),
       password_input = document.querySelector('.password_input input'),
       show_password = document.querySelector('.show_password'),
       error_info = document.querySelector('.error_info'),
@@ -84,14 +85,23 @@ if(Object.keys(users).length >= 1) { // есть хоть 1 юзер, прост
       captcha_close = document.querySelector('.captcha_close'),
       captcha_btn = document.querySelector('.captcha_btn input'),
       captcha_input = document.querySelector('.captcha_key input'),
+      captcha_img = document.querySelector('.captcha_img img'),
       captcha_sid, captcha_key, code;
       
   // кнопка закрытия капчи
   captcha_close.addEventListener('click', () => {
-    if(captcha_modal.style.display != 'none') {
-      captcha_modal.style.display = 'none';
-      error_info.innerHTML = '';
-    }
+    if(captcha_modal.style.display != 'none') captcha_modal.style.display = 'none';
+  });
+  
+  captcha_img.addEventListener('click', () => {
+    captcha_img.src += ~captcha_img.src.indexOf("rnd=") ? "1" : "&rnd=1";
+  });
+  
+  captcha_btn.addEventListener('click', () => {
+    captcha_key = captcha_input.value;
+    captcha_close.click();
+    captcha_input.value = '';
+    auth();
   });
   
   // кнопка для показа и скрытия пароля
@@ -107,29 +117,26 @@ if(Object.keys(users).length >= 1) { // есть хоть 1 юзер, прост
   
   wrapper_login.style.display = 'flex';
 
-  input_form.children[0].oninput = input_form.children[1].oninput = () => {
-    if(input_form.children[0].value.trim() != '' && // логин
-       input_form.children[1].children[1].value.trim() != '' && // пароль
+  login_input.oninput = password_input.oninput = () => {
+    if(login_input.value.trim() != '' &&
+       password_input.value.trim() != '' &&
        login_button.hasAttribute('disabled')) {
       login_button.removeAttribute('disabled');
     }
     
-    if(input_form.children[0].value.trim() == '' || // логин
-       input_form.children[1].children[1].value.trim() == '') { // пароль
+    if(login_input.value.trim() == '' ||
+       password_input.value.trim() == '') {
       login_button.setAttribute('disabled', '');
     }
   }
 
-  captcha_btn.addEventListener('click', () => {
-    captcha_key = captcha_input.value;
-    auth();
-  });
-
+  login_button.addEventListener('click', () => auth());
+  
   let auth = () => {
     vkapi.auth({
-      login: input_form.children[0].value,
-      password: input_form.children[1].children[1].value,
-      platform: [input_form.children[2].selectedIndex, input_form.children[2].value],
+      login: login_input.value,
+      password: password_input.value,
+      platform: [0, 'Android'],
       captcha_sid: captcha_sid,
       captcha_key: captcha_key,
       code: sms_code.value,
@@ -138,19 +145,16 @@ if(Object.keys(users).length >= 1) { // есть хоть 1 юзер, прост
       captcha_close.click();
       
       if(data.error) {
-        error_info.innerHTML = data.error_description || data.error || 'Неизвестная ошибка';
-          
         if(data.error == 'need_captcha') {
-          let captcha_img = document.querySelector('.captcha_img');
-          
-          captcha_img.children[0].src = data.captcha_img;
+          captcha_img.src = data.captcha_img;
           captcha_modal.style.display = 'flex';
           captcha_sid = data.captcha_sid;
         }
         
+        // TODO: сделать все красиво
         if(data.error == 'need_validation') {
           sms_code.style.display = 'block';
-          error_info.innerHTML += `<br>Смс придет на номер ${data.phone_mask}`;
+          error_info.innerHTML = `<br>Смс придет на номер ${data.phone_mask}`;
         }
         
         return;
@@ -166,7 +170,5 @@ if(Object.keys(users).length >= 1) { // есть хоть 1 юзер, прост
       
       startVK(users, users[user_id]);
     });
-  };
-
-  login_button.addEventListener('click', auth);
+  }
 }

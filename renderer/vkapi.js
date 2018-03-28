@@ -48,33 +48,32 @@ const toURLString = require('querystring').stringify;
 const { getCurrentWindow } = require('electron').remote;
 const md5 = require('./md5');
 
-var keys = {
-  android:       [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 0
-  iphone:        [3140623, 'VeWdmVclDCtn6ihuP1nt'], // 1
-  ipad:          [3682744, 'mY6CDUswIVdJLCD3j15n'], // 2
-  windows:       [3697615, 'AlVXZFMUqyrnABp8ncuU'], // 3
-  kate_mobile:   [2685278, 'lxhD8OD7dMsqtXIm5IUY']  // 4
-};
+var keys = [
+  [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 0 Android
+  [3140623, 'VeWdmVclDCtn6ihuP1nt'], // 1 iPhone
+  [3682744, 'mY6CDUswIVdJLCD3j15n'], // 2 iPad
+  [3697615, 'AlVXZFMUqyrnABp8ncuU'], // 3 Windows
+  [2685278, 'lxhD8OD7dMsqtXIm5IUY'], // 4 Kate Mobile
+  [5027722, 'Skg1Tn1r2qEbbZIAJMx3']  // 5 VK Messenger
+];
 
 var method = (method, params, callback) => {
   params = params || {};
   params.v = params.v || 5.73;
-  let secret;
+  let secret, active_user,
+      users = JSON.parse(fs.readFileSync('./renderer/users.json', 'utf-8'));
+      
+  Object.keys(users).forEach(user_id => {
+    if(users[user_id].active) active_user = users[user_id];
+  });
   
   if(params.secret) {
     secret = params.secret;
     delete params.secret;
-    console.log(params);
-  } else {
-    let users = fs.readFileSync('./renderer/users.json', 'utf-8'), active_user;
-    users = JSON.parse(users);
-    
-    Object.keys(users).forEach(user_id => {
-      if(users[user_id].active) active_user = users[user_id];
-    });
-    
+  } else if(method == 'account.setOnline' || method == 'account.setOffline') {
+    //secret = active_user.online.secret;
     secret = active_user.secret;
-  }
+  } else secret = active_user.secret;
   
   params.sig = md5('/method/' + method + '?' + toURLString(params) + secret);
   
@@ -82,10 +81,7 @@ var method = (method, params, callback) => {
     host: 'api.vk.com',
     path: `/method/${method}?${toURLString(params)}`,
     method: 'GET',
-    headers: {
-      'User-Agent': 'VKAndroidApp/4.8.3-1113'
-      //'User-Agent': 'KateMobileAndroid'
-    }
+    headers: { 'User-Agent': 'VKAndroidApp/4.13.1-1206' }
   }, res => {
     let body = '';
 
@@ -107,12 +103,13 @@ var auth = (authInfo, callback) => {
   
   let reqData = {
     grant_type: 'password',
-    client_id: keys[Object.keys(keys)[authInfo.platform[0]]][0],
-    client_secret: keys[Object.keys(keys)[authInfo.platform[0]]][1],
+    client_id: keys[authInfo.platform[0]][0],
+    client_secret: keys[authInfo.platform[0]][1],
     username: authInfo.login,
     password: authInfo.password,
     scope: 'nohttps,all',
     '2fa_supported': true,
+    force_sms: true,
     v: authInfo.v || 5.73
   }
   
@@ -137,6 +134,7 @@ var auth = (authInfo, callback) => {
       data = JSON.parse(data);
       users = JSON.parse(users);
       
+      console.log(authInfo);
       console.log(data);
       
       if(data.error) {
@@ -153,43 +151,60 @@ var auth = (authInfo, callback) => {
         fields: 'photo_50',
         v: 5.73
       }, user_info => {
-        Object.keys(users).forEach(user => users[user].active ? users[user].active = false : void 0);
-        
         console.log(user_info);
         // user data
         // Писать получение токена для музыки
-        vkapi.method('auth.refreshToken', {
+        
+        refreshToken({
           access_token: data.access_token,
-          secret: data.secret,
-          receipt: 'JSv5FBbXbY:APA91bF2K9B0eh61f2WaTZvm62GOHon3-vElmVq54ZOL5PHpFkIc85WQUxUH_wae8YEUKkEzLCcUC5V4bTWNNPbjTxgZRvQ-PLONDMZWo_6hwiqhlMM7gIZHM2K2KhvX-9oCcyD1ERw4',
-          v: 5.73
+          secret: data.secret
         }, ref_data => {
-          // refreshToken
-          
           let userInfo = {
-            access_token: ref_data.response.token,
+            active: true,
             id: data.user_id,
             platform: authInfo.platform,
             login: authInfo.login,
-            secret: ref_data.response.secret,
             first_name: user_info.response[0].first_name,
             last_name: user_info.response[0].last_name,
             photo_50: user_info.response[0].photo_50,
-            active: true
+            online: {
+              access_token: data.access_token,
+              secret:  data.secret
+            },
+            access_token: ref_data.access_token,
+            secret: ref_data.secret
           };
           
-          console.log(userInfo);
-          console.log(ref_data);
-          
           users[data.user_id] = userInfo;
-          fs.writeFileSync('./renderer/users.json', JSON.stringify(users, null, 2));
           
-          callback(userInfo);
-        })
+          fs.writeFileSync('./renderer/users.json', JSON.stringify(users, null, 2));
+          callback(users);
+        });
       });
     });
   }).end();
 };
+
+var refreshToken = (data, callback) => {
+  vkapi.method('auth.refreshToken', {
+    access_token: data.access_token,
+    secret: data.secret,
+    receipt: 'JSv5FBbXbY:APA91bF2K9B0eh61f2WaTZvm62GOHon3-vElmVq54ZOL5PHpFkIc85WQUxUH_wae8YEUKkEzLCcUC5V4bTWNNPbjTxgZRvQ-PLONDMZWo_6hwiqhlMM7gIZHM2K2KhvX-9oCcyD1ERw4',
+    v: 5.73
+  }, ref => callback({ access_token: ref.response.token, secret: ref.response.secret }))
+};
+
+// var getUserInfo = (data, callback) => {
+//   vkapi.method('users.get', {
+//     access_token: data.access_token,
+//     user_id: data.user_id,
+//     secret: data.secret,
+//     fields: 'photo_50',
+//     v: 5.73
+//   }, user_info => {
+//     // callback
+//   });
+// }
 
 var longpoll = (params, callback) => {
   let options = {
@@ -208,7 +223,5 @@ var longpoll = (params, callback) => {
 
 module.exports = {
   method,
-  auth,
-  keys,
-  longpoll
+  auth
 };
