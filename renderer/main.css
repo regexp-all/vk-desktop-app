@@ -29,7 +29,6 @@ body {
   font-size: 14px;
   margin: 0;
   min-width: 300px;
-  overflow-y: hidden;
 }
 
 .wrapper_login, .wrapper_content { display: none }
@@ -201,3 +200,56 @@ body {
 .tab_active { border-bottom: 2px solid #b5b5b5 }
 .tab_content { display: none }
 .content_active { display: block }
+
+.audio_item {
+  height: 50px;
+  max-width: 550px;
+  position: relative;
+  margin: 5px;
+  padding: 3px 0;
+  border-radius: 4px;
+  background-color: #fafbfc;
+  transition: all .5s;
+}
+
+.audio_item:hover, .audio_item_active {
+  background-color: #f2f4f7;
+}
+
+.audio_cover_play, .audio_cover, .audio_cover_stop {
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  border-radius: 4px;
+  top: 5px;
+  left: 4px;
+  background-repeat: no-repeat;
+  background-position: 50%;
+  /* transition: background-image .5s; */
+  transition: background-color .5s;
+}
+
+.audio_cover {
+  background-image: url('https://vk.com/images/audio_row_placeholder.png');
+  background-size: cover;
+}
+
+.audio_cover_play:hover {
+  background-color: rgba(0,0,0,.5);
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2212%22%20fill%3D%22%23FFFFFF%22%2F%3E%3Cpath%20fill%3D%22%23222222%22%20d%3D%22M9.84335571%2C16.7896383%20C9.37758321%2C17.088598%209%2C16.885726%209%2C16.3263902%20L9%2C7.6574922%20C9%2C7.10268766%209.37902442%2C6.89620947%209.84335571%2C7.19424408%20L16.733151%2C11.6165123%20C17.0561878%2C11.8238559%2017.0599966%2C12.1575817%2016.733151%2C12.3673701%20L9.84335571%2C16.7896383%20Z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+}
+
+.audio_cover_stop {
+  background-color: rgba(0,0,0,.5);
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2212%22%20fill%3D%22%23FFFFFF%22%2F%3E%3Cpath%20fill%3D%22%23222222%22%20d%3D%22M8%2C7.59559822%20C8%2C7.26665841%208.27685547%2C7%208.60709476%2C7%20L10.3929052%2C7%20C10.7281944%2C7%2011%2C7.26747584%2011%2C7.59559822%20L11%2C16.4044018%20C11%2C16.7333416%2010.7231445%2C17%2010.3929052%2C17%20L8.60709476%2C17%20C8.27180558%2C17%208%2C16.7325242%208%2C16.4044018%20L8%2C7.59559822%20Z%20M13%2C7.59559822%20C13%2C7.26665841%2013.2768555%2C7%2013.6070948%2C7%20L15.3929052%2C7%20C15.7281944%2C7%2016%2C7.26747584%2016%2C7.59559822%20L16%2C16.4044018%20C16%2C16.7333416%2015.7231445%2C17%2015.3929052%2C17%20L13.6070948%2C17%20C13.2718056%2C17%2013%2C16.7325242%2013%2C16.4044018%20L13%2C7.59559822%20Z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+}
+
+.audio_names { padding: 2px 0 0 54px }
+.audio_name { font-weight: 500 }
+.audio_author { color: #939393 }
+
+.audio_real_time, .audio_played_time {
+  position: absolute;
+  top: 13px;
+  right: 5px;
+}

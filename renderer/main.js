@@ -27,6 +27,7 @@
 const { shell } = require('electron').remote;
 const fs = require('fs');
 const vkapi = require('./vkapi');
+const audio = require('./audio');
 
 var tabs = document.querySelector('.tabs'),
     content = document.querySelector('.content'),
@@ -60,7 +61,7 @@ document.querySelectorAll('a').forEach(link => {
 // функция, которая запускает все части клиента
 var startVK = (users, user) => {
   // пока я вызываю audio, т.к. есть только 1 пункт
-  require('./audio')(user);
+  audio.load(user);
 }
 
 if(Object.keys(users).length >= 1) { // если есть хоть 1 юзер, то идем дальше
