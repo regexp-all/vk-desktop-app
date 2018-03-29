@@ -202,7 +202,7 @@ body {
 .content_active { display: block }
 
 .audio_item {
-  height: 50px;
+  min-height: 50px;
   max-width: 550px;
   position: relative;
   margin: 5px;
@@ -225,7 +225,6 @@ body {
   left: 4px;
   background-repeat: no-repeat;
   background-position: 50%;
-  /* transition: background-image .5s; */
   transition: background-color .5s;
 }
 
@@ -244,7 +243,7 @@ body {
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2212%22%20fill%3D%22%23FFFFFF%22%2F%3E%3Cpath%20fill%3D%22%23222222%22%20d%3D%22M8%2C7.59559822%20C8%2C7.26665841%208.27685547%2C7%208.60709476%2C7%20L10.3929052%2C7%20C10.7281944%2C7%2011%2C7.26747584%2011%2C7.59559822%20L11%2C16.4044018%20C11%2C16.7333416%2010.7231445%2C17%2010.3929052%2C17%20L8.60709476%2C17%20C8.27180558%2C17%208%2C16.7325242%208%2C16.4044018%20L8%2C7.59559822%20Z%20M13%2C7.59559822%20C13%2C7.26665841%2013.2768555%2C7%2013.6070948%2C7%20L15.3929052%2C7%20C15.7281944%2C7%2016%2C7.26747584%2016%2C7.59559822%20L16%2C16.4044018%20C16%2C16.7333416%2015.7231445%2C17%2015.3929052%2C17%20L13.6070948%2C17%20C13.2718056%2C17%2013%2C16.7325242%2013%2C16.4044018%20L13%2C7.59559822%20Z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
 }
 
-.audio_names { padding: 2px 0 0 54px }
+.audio_names { padding: 2px 30px 0 54px }
 .audio_name { font-weight: 500 }
 .audio_author { color: #939393 }
 

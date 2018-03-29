@@ -1,8 +1,13 @@
-var load = user => {
-  var audiolist = document.querySelector('.audiolist');
-  
-  vkapi.method('audio.get', {}, data => {
+var audiolist = document.querySelector('.audiolist');
+
+var load = (user, offset) => {
+  vkapi.method('audio.get', {
+    offset: offset || 0,
+    count: 15
+  }, data => {
     data = data.response;
+    console.log(data);
+    
     data.items.forEach(item => {
       let cover, time = Math.floor(item.duration/60) + ':';
       
@@ -34,7 +39,25 @@ var load = user => {
         </div>
       `.trim();
     });
+    
+    getMoreSound(user, offset, data)
   });
+}
+
+var getMoreSound = (user, offset, data) => {
+  let forListen = () => {
+    if(audiolist.clientHeight - 600 < window.scrollY) {
+      window.removeEventListener('scroll', forListen);
+      if(offset) {
+        if(offset < data.count) {
+          offset += 15;
+          load(user, offset);
+        }
+      } else load(user, 15);
+    }
+  }
+  
+  window.addEventListener('scroll', forListen);
 }
 
 var audio = document.querySelector('.audio');
