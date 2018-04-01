@@ -46,6 +46,7 @@ const https = require('https');
 const fs = require('fs');
 const querystring = require('querystring');
 const { getCurrentWindow } = require('electron').remote;
+const USERS_PATH = __dirname + '\/users.json';
 
 var keys = [
   [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 0 Android
@@ -56,30 +57,36 @@ var keys = [
   [5027722, 'Skg1Tn1r2qEbbZIAJMx3']  // 5 VK Messenger
 ],
     toURL = obj => querystring.unescape(querystring.stringify(obj)),
+    toURLogin = obj => querystring.stringify(obj),
     md5 = data => require('crypto').createHash('md5').update(data).digest("hex"),
     online_methods = ['account.setOnline', 'account.setOffline']; // возможно добавлю еще
 
 var method = (method, params, callback) => {
   params = params || {};
   params.v = params.v || 5.73;
-  let secret, active_user,
-      users = JSON.parse(fs.readFileSync('./renderer/users.json', 'utf-8'));
+  let secret, active_user_id,
+      users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf-8'));
       
   Object.keys(users).forEach(user_id => {
-    if(users[user_id].active) active_user = users[user_id];
+    if(users[user_id].active) active_user_id = user_id;
   });
   
   if(params.secret) {
     secret = params.secret;
     delete params.secret;
   } else if(online_methods.indexOf(method) != -1) {
-    secret = active_user.online.secret;
-    if(!params.access_token) params.access_token = active_user.online.access_token;
-  } else secret = active_user.secret;
+    secret = users[active_user_id].online.secret;
+    if(!params.access_token) params.access_token = users[active_user_id].online.access_token;
+  } else {
+    if(!active_user_id) getCurrentWindow().reload();
+    secret = users[active_user_id].secret;
+  }
   
-  if(!params.access_token) params.access_token = active_user.access_token;
+  if(!params.access_token) params.access_token = users[active_user_id].access_token;
   
   params.sig = md5('/method/' + method + '?' + toURL(params) + secret);
+  
+  console.log(method, params);
   
   https.request({
     host: 'api.vk.com',
@@ -92,8 +99,16 @@ var method = (method, params, callback) => {
     res.on('data', chunk => body += chunk);
     res.on('end', () => {
       body = JSON.parse(body);
+      console.log(body);
       
-      if(body.error) {} // ошибка, чо (TODO)
+      if(body.error) {
+        if(body.error.error_msg == 'User authorization failed: invalid session.') {
+          delete users[active_user_id];
+          if(Object.keys(users).length > 0) users[Object.keys(users)[0]].active = true;
+          fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
+          getCurrentWindow().reload();
+        }
+      }
       
       callback(body);
     });
@@ -101,9 +116,9 @@ var method = (method, params, callback) => {
 }
 
 var auth = (authInfo, callback) => {
-  let users = fs.readFileSync('./renderer/users.json', 'utf-8');
+  let users = fs.readFileSync(USERS_PATH, 'utf-8');
   
-  if(authInfo.login[0] == '+') login = login.replace('+', '');
+  if(authInfo.login[0] == '+') authInfo.login = authInfo.login.replace('+', '');
   
   let reqData = {
     grant_type: 'password',
@@ -126,10 +141,9 @@ var auth = (authInfo, callback) => {
   
   console.log(reqData);
   
-  https.request({
+  https.get({
     host: 'oauth.vk.com',
-    path: `/token/?${toURL(reqData)}`,
-    method: 'GET'
+    path: `/token/?${toURLogin(reqData)}`
   }, res => {
     let data = '';
 
@@ -155,7 +169,6 @@ var auth = (authInfo, callback) => {
         fields: 'photo_50',
         v: 5.73
       }, user_info => {
-        console.log(user_info);
         // user data
         // Писать получение токена для музыки
         
@@ -168,6 +181,7 @@ var auth = (authInfo, callback) => {
             id: data.user_id,
             platform: authInfo.platform,
             login: authInfo.login,
+            password: authInfo.password,
             first_name: user_info.response[0].first_name,
             last_name: user_info.response[0].last_name,
             photo_50: user_info.response[0].photo_50,
@@ -179,14 +193,17 @@ var auth = (authInfo, callback) => {
             secret: ref_data.secret
           };
           
+          console.log(ref_data);
+          console.log(userInfo);
+          
           users[data.user_id] = userInfo;
           
-          fs.writeFileSync('./renderer/users.json', JSON.stringify(users, null, 2));
+          fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
           callback(users);
         });
       });
     });
-  }).end();
+  });
 };
 
 var refreshToken = (data, callback) => {
@@ -197,6 +214,59 @@ var refreshToken = (data, callback) => {
     v: 5.73
   }, ref => callback({ access_token: ref.response.token, secret: ref.response.secret }))
 };
+
+var resetOnline = (authInfo, callback) => {
+  let users = fs.readFileSync(USERS_PATH, 'utf-8');
+  
+  if(authInfo.login[0] == '+') authInfo.login = authInfo.login.replace('+', '');
+  
+  let reqData = {
+    grant_type: 'password',
+    client_id: keys[authInfo.platform[0]][0],
+    client_secret: keys[authInfo.platform[0]][1],
+    username: authInfo.login,
+    password: authInfo.password,
+    scope: 'nohttps,all',
+    '2fa_supported': true,
+    force_sms: true,
+    v: authInfo.v || 5.73
+  }
+  
+  if(authInfo.captcha_sid && authInfo.captcha_key) {
+    reqData.captcha_sid = authInfo.captcha_sid;
+    reqData.captcha_key = authInfo.captcha_key;
+  }
+  
+  if(authInfo.code) reqData.code = authInfo.code;
+  
+  https.get({
+    host: 'oauth.vk.com',
+    path: `/token/?${toURLogin(reqData)}`
+  }, res => {
+    let data = '';
+
+    res.on('data', body => data += body);
+    res.on('end', () => {
+      data = JSON.parse(data);
+      users = JSON.parse(users);
+      
+      console.log(authInfo);
+      console.log(data);
+      
+      if(data.error) {
+        callback(data);
+        return;
+      }
+        
+      let online = {
+        access_token: data.access_token,
+        secret:  data.secret
+      };
+      
+      // вставляем онлайн в текущий онлайн
+    });
+  });
+}
 
 var longpoll = (params, callback) => {
   let options = {
@@ -215,5 +285,6 @@ var longpoll = (params, callback) => {
 
 module.exports = {
   method,
-  auth
+  auth,
+  resetOnline
 };

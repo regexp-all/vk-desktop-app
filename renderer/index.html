@@ -10,24 +10,24 @@
     <div class="wrapper_login">
       <div class="login_title">ВКонтакте</div>
       <div class="input_form">
-        <input type="text" placeholder="Введите логин" class='login_input'>
+        <input type="text" placeholder="Введите логин" class='login_input' autofocus>
         <div class="password_input">
           <div class="show_password"></div>
           <input type="password" placeholder="Введите пароль">
         </div>
         <input type="text" placeholder="Введите код из смс" class='sms_code_input' style='display: none'>
+        <div class="twofa_info"></div>
         <input type="button" value="Войти" class='login_button' disabled>
       </div>
       <div class="error_info" style='color: red;'></div>
       <div class="bottom_info">
         При возникновении проблем пишите <a href='https://vk.com/danyadev'>сюда</a>.<br><br>
-        Платфрома по умолчанию - Android.<br>
+        Платформа по умолчанию - Android.<br>
         Ее можно изменить в настройках.
       </div>
       <!-- модальное окно для капчи -->
       <div class="captcha_modal">
         <div class="captcha">
-          <div class="captcha_header"><div class="captcha_close"></div></div>
           <div class="captcha_img"><img></div>
           <div class="captcha_info">Не видно? Нажмите на картинку</div>
           <div class="captcha_key"><input type="text" placeholder="Введите капчу"></div>
@@ -36,13 +36,64 @@
       </div>
     </div>
     <div class="wrapper_content">
-      <div class="tabs">
-        <div class="tab">Музыка</div>
+      <div class="header">
+        <div class="open_menu"><div class="open_menu_icon"></div></div>
+      </div>
+      <div class="menu">
+        <div class="menu_acc_item" title='Моя страница'><div class="acc_icon"></div></div>
+        <div class="menu_item" title='Новости'><div class="menu_icon menu_news_icon"></div></div>
+        <div class="menu_item" title='Сообщения'><div class="menu_icon menu_mess_icon"></div></div>
+        <div class="menu_item" title='Музыка'><div class="menu_icon menu_music_icon"></div></div>
+        <div class="menu_item" title='Уведомления'><div class="menu_icon menu_notify_icon"></div></div>
+        <div class="menu_item" title='Друзья'><div class="menu_icon menu_friends_icon"></div></div>
+        <div class="menu_item" title='Группы'><div class="menu_icon menu_groups_icon"></div></div>
+        <div class="menu_item" title='Фотографии'><div class="menu_icon menu_photos_icon"></div></div>
+        <div class="menu_item" title='Видеозаписи'><div class="menu_icon menu_videos_icon"></div></div>
+        <div class="menu_item" title='Открыть DevTools'><div class="menu_icon menu_settings_icon"></div></div>
       </div>
       <div class="content">
-        <div class="tab_content audiolist">
-          <audio class='audio'></audio>
+        <div class="tab_content">Моя страница</div>
+        <div class="tab_content">Новости</div>
+        <div class="tab_content">Сообщения</div>
+        <div class="tab_content">
+          <div class="content_audio">
+            <div class="center_audio">
+              <div class="pl50"></div>
+              <div class="audioplayer">
+                <audio class='audio'></audio>
+                <div class="player_cover"></div>
+                <div class="player_cover_img"></div>
+                <div class="btns">
+                  <div class="player_button"><div class="player_back"></div></div>
+                  <div class="player_btn player_play"></div>
+                  <div class="player_button"><div class="player_next"></div></div>
+                </div>
+                <div class="player_name_line">
+                  <div class="player_name"></div>
+                  <div class="player_author"></div>
+                </div>
+              </div>
+              
+              <div class="audiolist"></div>
+            </div>
+          </div>
         </div>
+        <div class="tab_content">Уведомления</div>
+        <div class="tab_content">Друзья</div>
+        <div class="tab_content">Группы</div>
+        <div class="tab_content">Фотографии</div>
+        <div class="tab_content">Видеозаписи</div>
+        <!-- <div class="tab_content content_settings">
+          Платформа: 
+          <select class='platform'>
+           <option>Android</option>
+           <option>iPhone</option>
+           <option>iPad</option>
+           <option>Windows</option>
+           <option>Kate Mobile</option>
+           <option>VK Messenger</option>
+         </select>
+        </div> -->
       </div>
     </div>
   </body>

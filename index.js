@@ -31,14 +31,12 @@ try {
   require('./../reload/node_modules/electron-reload')(__dirname, {
     ignored: [
       __dirname + '/.git',
-      __dirname + '/.gitignore',
       __dirname + '/index.js',
       __dirname + '/LICENSE',
       __dirname + '/renderer/users.json',
       __dirname + '/README.md',
       __dirname + '/node_modules',
-      __dirname + '/package.json',
-      __dirname + '/package_lock.json'
+      __dirname + '/package.json'
     ]
 })} catch(e){}
 
@@ -50,11 +48,12 @@ app.on('ready', () => {
   win = new BrowserWindow({
     width: 720,
     height: 480,
-    minWidth: 380,
+    minWidth: 620,
     minHeight: 480,
     show: false
   });
-
+  
+  win.setMenu(null);
   win.loadFile('renderer/index.html');
   win.on('ready-to-show', () => win.show());
   win.on('closed', () => win = null);
