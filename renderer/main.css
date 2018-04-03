@@ -29,7 +29,7 @@ body {
   font-size: 14px;
   margin: 0;
   min-width: 300px;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .wrapper_login, .wrapper_content { display: none }
@@ -185,54 +185,118 @@ body {
   float: left;
 }
 
+.open_menu:hover {
+  background-color: #3f638c
+}
+
 .open_menu_icon {
   width: 44px;
   height: 44px;
   background-color: white;
   -webkit-mask-position: 0 -44px;
-  -webkit-mask-image: url('https://m.vk.com/images/mobile/skins/icon/header.png');
+  -webkit-mask-image: url('images/m_vk_header.png');
 }
 
 .menu {
-  width: 46px;
-  height: calc(100vh - 44px);
-  background-color: #4a76a8;
+  width: 250px;
+  height: 100%;
+  top: 0;
+  overflow: auto;
+  background-color: white;
   display: inline-block;
-  float: left;
   position: fixed;
-  z-index: 2;
-  top: 44px;
+  z-index: 11;
+  transition: left .6s;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  overflow-x: hidden;
+}
+
+.menu_account_item {
+  height: 120px;
+  padding-top: 6px;
+  background-color: rgba(38, 37, 37, 0.4);
   transition: all .3s;
 }
 
-.menu_acc_item {
-  height: 44px;
-  padding-top: 6px;
-  transition: all .3s;
+.menu_account_bgc {
+  position: absolute;
+  width: 250px;
+  height: 120px;
+  top: -1px;
+  left: -1px;
+  z-index: -1;
+  background-repeat: no-repeat;
+  background-position: 0 -45px;
+  background-size: 100%;
+  filter:blur(4px);
+}
+
+.menu_multiacc {
+  width: 24px;
+  height: 22px;
+  margin-left: 10px;
+  position: absolute;
+  z-index: 100;
+  right: 10px;
+  background-color: white;
+  -webkit-mask-size: cover;
+  -webkit-mask-image: url('images/menu_groups.png');
+  cursor: pointer;
 }
 
 .acc_icon {
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  margin-left: 6px;
+  width: 56px;
+  height: 56px;
   background-size: 100%;
+  margin-left: 6px;
+  cursor: pointer;
+}
+
+.menu_acc_name {
+  margin-top: 10px;
+  font-weight: 480;
+  color: #f0f0f0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-left: 6px;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+.menu_acc_status {
+  font-size: 13px;
+  max-width: 240px;
+  color: #d4d4d4;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-left: 6px;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px }
+
+::-webkit-scrollbar-thumb {
+  border-radius: 25px;
+  background-color: rgba(143, 143, 143, 0.7);
 }
 
 .menu_item {
   height: 44px;
   padding-top: 10px;
+  padding-right: 50px;
   transition: all .3s;
+  cursor: pointer;
 }
 
-.menu_item:hover, .open_menu:hover,
-.menu_acc_item:hover, .menu_item_active { background-color: #3a679c }
+.menu_item:hover, .menu_item_active:not(.menu_account_item) { background-color: #ebeced }
 
 .menu_icon {
   width: 24px;
   height: 22px;
   margin-left: 10px;
-  background-color: white;
+  background-color: #a6a6a6;
   -webkit-mask-size: cover;
 }
 
@@ -244,15 +308,25 @@ body {
 .menu_groups_icon   { -webkit-mask-image: url('images/menu_groups.png')        }
 .menu_photos_icon   { -webkit-mask-image: url('images/menu_photos.png')        }
 .menu_videos_icon   { -webkit-mask-image: url('images/menu_videos.png')        }
-.menu_settings_icon { -webkit-mask-image: url('images/menu_settings.svg')      }
+.menu_settings_icon { -webkit-mask-image: url('images/menu_settings.png')      }
+
+.menu_icon, .menu_item_name { float: left }
+
+.menu_item_name {
+  margin-left: 8px;
+  margin-top: 1px;
+  user-select: none;
+}
 
 .content {
   margin-top: 44px;
   transition: all .3s;
+  height: calc(100vh - 44px);
+  overflow: auto;
 }
 
 .tab_content { display: none }
-.content_active { display: block; float: left }
+.content_active { display: block }
 
 /* --------------------------------------------------------------- */
 
@@ -260,7 +334,6 @@ body {
   display: flex;
   justify-content: center;
   background: #f2f2f2;
-  width: 100vw;
 }
 
 .pl50 { height: 50px; display: none } /* заглушка для плеера, чтобы не скакал при переводе на fixed */
@@ -299,7 +372,7 @@ body {
   background-size: cover;
 }
 
-.btns { height: 50px; width: 85px; float: left }
+.btns { height: 50px; width: 78px; float: left }
 
 .player_play {
   float: left;
@@ -324,7 +397,7 @@ body {
 .player_button {
   float: left;
   height: 100%;
-  padding: 20px 5px 0 5px;
+  padding: 20px 8px 0 8px;
 }
 
 .player_back {
@@ -343,9 +416,14 @@ body {
   background-image: url('images/player_next.svg');
 }
 
-.player_name_line { padding-top: 5px; min-height: 50px; margin-left: 125px }
-.player_author { display: inline; color: #939393 }
-.player_name { font-weight: 500 }
+.player_name_line { padding-top: 5px }
+.player_author { font-weight: 500 }
+
+.player_name, .audio_name, .audio_author {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 
 .audiolist {
   background-color: white;
@@ -357,16 +435,16 @@ body {
 }
 
 .audio_item {
+  min-width: 320px;
   max-width: 90vw;
   min-height: 50px;
   position: relative;
   margin: 5px;
   border-radius: 4px;
-  background-color: #f7f7f7;
   transition: all .5s;
 }
 
-.audio_item:hover, .audio_item_active { background-color: #ebebeb }
+.audio_item:hover, .audio_item_active { background-color: #edf0f2 }
 
 .audio_cover_play, .audio_cover, .audio_cover_stop {
   width: 40px;
@@ -400,9 +478,9 @@ body {
 .audio_author { color: #939393 }
 
 .audio_real_time, .audio_played_time {
-  position: absolute;
-  top: 13px;
-  right: 5px;
+  float: right;
+  margin-top: -25px;
+  margin-right: 3px;
   user-select: none;
 }
 

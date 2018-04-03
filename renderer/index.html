@@ -25,31 +25,57 @@
         Платформа по умолчанию - Android.<br>
         Ее можно изменить в настройках.
       </div>
-      <!-- модальное окно для капчи -->
-      <div class="captcha_modal">
-        <div class="captcha">
-          <div class="captcha_img"><img></div>
-          <div class="captcha_info">Не видно? Нажмите на картинку</div>
-          <div class="captcha_key"><input type="text" placeholder="Введите капчу"></div>
-          <div class="captcha_btn"><input type="button" value='Продолжить'></div>
-        </div>
-      </div>
+      <div class="captcha_modal"></div>
     </div>
     <div class="wrapper_content">
       <div class="header">
         <div class="open_menu"><div class="open_menu_icon"></div></div>
+        <!-- сюда чота добавить -->
       </div>
       <div class="menu">
-        <div class="menu_acc_item" title='Моя страница'><div class="acc_icon"></div></div>
-        <div class="menu_item" title='Новости'><div class="menu_icon menu_news_icon"></div></div>
-        <div class="menu_item" title='Сообщения'><div class="menu_icon menu_mess_icon"></div></div>
-        <div class="menu_item" title='Музыка'><div class="menu_icon menu_music_icon"></div></div>
-        <div class="menu_item" title='Уведомления'><div class="menu_icon menu_notify_icon"></div></div>
-        <div class="menu_item" title='Друзья'><div class="menu_icon menu_friends_icon"></div></div>
-        <div class="menu_item" title='Группы'><div class="menu_icon menu_groups_icon"></div></div>
-        <div class="menu_item" title='Фотографии'><div class="menu_icon menu_photos_icon"></div></div>
-        <div class="menu_item" title='Видеозаписи'><div class="menu_icon menu_videos_icon"></div></div>
-        <div class="menu_item" title='Открыть DevTools'><div class="menu_icon menu_settings_icon"></div></div>
+        <div class="menu_account_item">
+          <div class="menu_account_bgc"></div>
+          <div class="menu_multiacc"></div>
+          <div class="acc_icon"></div>
+          <div class="menu_acc_name"></div>
+          <div class="menu_acc_status">...</div>
+        </div>
+        <div class="menu_item">
+          <div class="menu_icon menu_news_icon"></div>
+          <div class="menu_item_name">Новости</div>
+        </div>
+        <div class="menu_item">
+          <div class="menu_icon menu_mess_icon"></div>
+          <div class="menu_item_name">Сообщения</div>
+        </div>
+        <div class="menu_item">
+          <div class="menu_icon menu_music_icon"></div>
+          <div class="menu_item_name">Музыка</div>
+        </div>
+        <div class="menu_item">
+          <div class="menu_icon menu_notify_icon"></div>
+          <div class="menu_item_name">Уведомления</div>
+        </div>
+        <div class="menu_item">
+          <div class="menu_icon menu_friends_icon"></div>
+          <div class="menu_item_name">Друзья</div>
+        </div>
+        <div class="menu_item">
+          <div class="menu_icon menu_groups_icon"></div>
+          <div class="menu_item_name">Группы</div>
+        </div>
+        <div class="menu_item">
+          <div class="menu_icon menu_photos_icon"></div>
+          <div class="menu_item_name">Фотографии</div>
+        </div>
+        <div class="menu_item">
+          <div class="menu_icon menu_videos_icon"></div>
+          <div class="menu_item_name">Видеозаписи</div>
+        </div>
+        <div class="menu_item">
+          <div class="menu_icon menu_settings_icon"></div>
+          <div class="menu_item_name">Настройки</div>
+        </div>
       </div>
       <div class="content">
         <div class="tab_content">Моя страница</div>
@@ -70,7 +96,6 @@
                 </div>
                 <div class="player_name_line">
                   <div class="player_name"></div>
-                  <div class="player_author"></div>
                 </div>
               </div>
               

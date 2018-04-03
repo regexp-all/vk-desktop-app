@@ -1,4 +1,5 @@
 var audiolist = document.querySelector('.audiolist'),
+    content = document.querySelector('.content'),
     player_cover = document.querySelector('.player_cover'),
     player_cover_img = document.querySelector('.player_cover_img'),
     player_btn = document.querySelector('.player_btn'),
@@ -46,8 +47,8 @@ var load = (user, offset) => {
 
 var getMoreSound = (user, offset, data) => {
   let forListen = () => {
-    if(audiolist.clientHeight && audiolist.clientHeight - window.outerHeight < window.scrollY) {
-      window.removeEventListener('scroll', forListen);
+    if(audiolist.clientHeight && audiolist.clientHeight - window.outerHeight < content.scrollTop) {
+      content.removeEventListener('scroll', forListen);
       if(offset) {
         if(offset < data.count) {
           offset += 15;
@@ -57,25 +58,24 @@ var getMoreSound = (user, offset, data) => {
     }
   }
   
-  window.addEventListener('scroll', forListen);
-  
-  if(!window.pageLoaded && audiolist.clientHeight - window.outerHeight < window.scrollY) {
-    forListen();
-    audio.audio_item = audiolist.children[0]; // первая песня в плейлисте
-    if(audiolist.clientHeight - window.outerHeight > window.scrollY) window.pageLoaded = 1;
-  } else if(!window.pageLoaded) {
-    audio.audio_item = audiolist.children[0]; // первая песня в плейлисте
-    window.pageLoaded = 1;
-  }
+  content.addEventListener('scroll', forListen);
   
   if(!audio.audio_item) {
+    audio.audio_item = audiolist.children[0]; // первая песня в плейлисте
     if(audio.audio_item.children[0].style.backgroundImage != 'url("https://vk.com/images/audio_row_placeholder.png")')
       player_cover_img.style.backgroundImage = audio.audio_item.children[0].style.backgroundImage;
     else player_cover_img.style.backgroundImage = '';
     
-    player_name.innerHTML = audio.audio_item.children[2].children[0].innerHTML;
-    player_author.innerHTML = audio.audio_item.children[2].children[1].innerHTML;
+    player_name.innerHTML = '<span class=\'player_author\'>'
+                          + audio.audio_item.children[2].children[1].innerHTML
+                          + '</span> – '
+                          + audio.audio_item.children[2].children[0].innerHTML;
   }
+  
+  if(!window.pageLoaded && audiolist.clientHeight - window.outerHeight < window.scrollY) {
+    forListen();
+    if(audiolist.clientHeight - window.outerHeight > window.scrollY) window.pageLoaded = 1;
+  } else if(!window.pageLoaded) window.pageLoaded = 1;
 }
 
 var matchPlayedTime = () => {
@@ -83,8 +83,8 @@ var matchPlayedTime = () => {
   
   let time = audio.currentTime,
       zero = time%60 < 10 ? '0' : '',
-      audio_real_time = track.children[3],
-      audio_played_time = track.children[4];
+      audio_real_time = audio.audio_item.children[3],
+      audio_played_time = audio.audio_item.children[4];
       
   if(!audio_real_time.showreal) audio_real_time.style.display = 'none';
   if(!audio_real_time.classList.hidden) audio_real_time.classList.add('hidden_time');
@@ -95,9 +95,11 @@ var matchPlayedTime = () => {
 }
 
 var toggleAudio = (track, event) => {
+  console.log(track);
+  if(!track) return;
   if(event && event.target != track.children[1]) return;
+  console.log(event);
   
-  window.track = track;
   audio.audio_item = track;
   window.this_track_id = [].slice.call(audiolist.children).indexOf(track);
   
@@ -132,8 +134,10 @@ var toggleAudio = (track, event) => {
       player_cover_img.style.backgroundImage = track.children[0].style.backgroundImage;
     else player_cover_img.style.backgroundImage = '';
     
-    player_name.innerHTML = track.children[2].children[0].innerHTML;
-    player_author.innerHTML = track.children[2].children[1].innerHTML;
+    player_name.innerHTML = '<span class=\'player_author\'>'
+                          + audio.audio_item.children[2].children[1].innerHTML
+                          + '</span> – '
+                          + audio.audio_item.children[2].children[0].innerHTML;
   }
   
   if(audio.paused) {
@@ -187,12 +191,10 @@ var toggleTime = (elem, event, type) => {
       real = item.children[3],
       played = item.children[4];
       
-  if(type == 'real') {
-    if(played.innerHTML != '') {
-      real.style.display = 'none';
-      real.showreal = 0;
-      played.style.display = 'block';
-    }
+  if(type == 'real' && played.innerHTML != '') {
+    real.style.display = 'none';
+    real.showreal = 0;
+    played.style.display = 'block';
   } else {
     real.showreal = 1;
     real.style.display = 'block';
@@ -206,9 +208,21 @@ audio.addEventListener('ended', () => { // переключение на сле�
   audio.audio_item.classList.remove('audio_item_active');
   
   let track = audiolist.children[window.this_track_id+1];
-  if(!track) track = audiolist.children[0]
+  if(!track) track = audiolist.children[0];
   
-  setTimeout(() => toggleAudio(track), 600);
+  setTimeout(() => toggleAudio(track), 400);
+});
+
+content.addEventListener('scroll', () => {
+  if(content.scrollTop >= 56) { // 100 - 44, где 44 - высота шапки
+    audioplayer.style.position = 'fixed';
+    audioplayer.style.marginTop = '44px';
+    document.querySelector('.pl50').style.display = 'block';
+  } else {
+    audioplayer.style.position = '';
+    audioplayer.style.marginTop = '';
+    document.querySelector('.pl50').style.display = 'none';
+  }
 });
 
 // audio.addEventListener("progress", () => {

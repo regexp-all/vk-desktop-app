@@ -63,13 +63,18 @@ var keys = [
 
 var method = (method, params, callback) => {
   params = params || {};
+  callback = callback || (data => console.log(data));
   params.v = params.v || 5.73;
-  let secret, active_user_id,
-      users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf-8'));
+  let secret, active_user_id, users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf-8'));
       
   Object.keys(users).forEach(user_id => {
     if(users[user_id].active) active_user_id = user_id;
   });
+  
+  if(!active_user_id) {
+    getCurrentWindow().reload();
+    return;
+  }
   
   if(params.secret) {
     secret = params.secret;
@@ -77,10 +82,7 @@ var method = (method, params, callback) => {
   } else if(online_methods.indexOf(method) != -1) {
     secret = users[active_user_id].online.secret;
     if(!params.access_token) params.access_token = users[active_user_id].online.access_token;
-  } else {
-    if(!active_user_id) getCurrentWindow().reload();
-    secret = users[active_user_id].secret;
-  }
+  } else secret = users[active_user_id].secret;
   
   if(!params.access_token) params.access_token = users[active_user_id].access_token;
   
@@ -99,7 +101,6 @@ var method = (method, params, callback) => {
     res.on('data', chunk => body += chunk);
     res.on('end', () => {
       body = JSON.parse(body);
-      console.log(body);
       
       if(body.error) {
         if(body.error.error_msg == 'User authorization failed: invalid session.') {
@@ -166,7 +167,7 @@ var auth = (authInfo, callback) => {
         access_token: data.access_token,
         user_id: data.user_id,
         secret: data.secret,
-        fields: 'photo_50',
+        fields: 'photo_100',
         v: 5.73
       }, user_info => {
         // user data
@@ -184,7 +185,7 @@ var auth = (authInfo, callback) => {
             password: authInfo.password,
             first_name: user_info.response[0].first_name,
             last_name: user_info.response[0].last_name,
-            photo_50: user_info.response[0].photo_50,
+            photo_100: user_info.response[0].photo_100,
             online: {
               access_token: data.access_token,
               secret:  data.secret
