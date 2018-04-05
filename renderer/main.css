@@ -17,8 +17,7 @@
 /* Контактные данные:
    vk: https://vk.com/danyadev
    telegram: https://t.me/danyadev
-   email: danyadev@mail.ru
-   gmail: danyadev0@gmail.com
+   email: nemov.danil@mail.ru
    github: https://github.com/danyadev/vk-desktop-app
 */
 
@@ -31,6 +30,91 @@ body {
   min-width: 300px;
   overflow: hidden;
 }
+
+.modal_settings_wrapper {
+  display: none;
+  opacity: 0;
+  justify-content: center;
+  position: absolute;
+  padding: 20px 0;
+  z-index: 10;
+  width: 100%;
+  height: calc(100% - 44px);
+  background-color: rgba(0, 0, 0, .4);
+  user-select: none;
+  min-width: 500px;
+  transition: opacity .4s;
+}
+
+.modal_settings {
+  height: 100%;
+  width: 500px;
+  border-radius: 5px;
+  user-select: auto;
+  background-color: #fff;
+  z-index: 11;
+}
+
+.settings_header {
+  position: relative;
+  padding: 10px 0 0;
+  background: #fafbfc;
+  border-bottom: 1px solid #e7e8ec;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.settings_title { font-size: 20px; padding: 0 24px 6px }
+
+.settings_close {
+  background: url('images/settings_close.svg') center center no-repeat;
+  background-size: 16px 16px;
+  width: 45px;
+  height: 45px;
+  opacity: .3;
+  transition: opacity .2s;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.settings_close:hover { opacity: .6 }
+
+.settings_tabs { margin: 0 18px; user-select: none }
+
+.settings_tab {
+  display: inline-block;
+  color: #656565;
+  cursor: pointer;
+  padding: 8px;
+  transition: color .2s;
+}
+
+.settings_tab, .settings_tab:hover { color: #000 }
+.settings_tab_active { border-bottom: 2px solid #b5b5b5 }
+
+.settings_item_content {
+  display: none;
+  background-color: #fff;
+  overflow: auto;
+  padding: 10px;
+}
+
+.settings_content_active { display: block }
+
+.open_devTools {
+  position: fixed;
+  bottom: 5px;
+  left: 3px;
+  width: 24px;
+  height: 22px;
+  background-color: #c2c2c2;
+  -webkit-mask-size: cover;
+  -webkit-mask-image: url('images/menu_settings.png');
+  transition: all .3s;
+}
+
+.open_devTools:hover { background-color: #a6a6a6 }
 
 .wrapper_login, .wrapper_content { display: none }
 
@@ -114,6 +198,8 @@ body {
 
 .captcha_modal {
   display: none;
+  position: absolute;
+  top: 0;
   justify-content: center;
   align-items: center;
   position: absolute;
@@ -325,7 +411,7 @@ body {
   overflow: auto;
 }
 
-.tab_content { display: none }
+.tab_content { display: none; height: 100% }
 .content_active { display: block }
 
 /* --------------------------------------------------------------- */
@@ -334,6 +420,7 @@ body {
   display: flex;
   justify-content: center;
   background: #f2f2f2;
+  height: 100%;
 }
 
 .pl50 { height: 50px; display: none } /* заглушка для плеера, чтобы не скакал при переводе на fixed */
@@ -476,6 +563,34 @@ body {
 .audio_names { padding: 2px 30px 0 54px }
 .audio_name { font-weight: 500 }
 .audio_author { color: #939393 }
+
+.audio_download {
+  width: 24px;
+  height: 22px;
+  float: right;
+  margin-top: -25px;
+  margin-right: 35px;
+  background-color: #999;
+  -webkit-mask-size: cover;
+  -webkit-mask-image: url('images/audio_download.png');
+  transition: all .3s;
+}
+
+.audio_download:hover { background-color: #666 }
+
+.audio_downloaded {
+  width: 24px;
+  height: 22px;
+  float: right;
+  margin-top: -26px;
+  margin-right: 35px;
+  background-color: #999;
+  -webkit-mask-size: cover;
+  -webkit-mask-image: url('images/check.png');
+  transition: all .3s;
+}
+
+.audio_downloaded:hover { background-color: #888 }
 
 .audio_real_time, .audio_played_time {
   float: right;

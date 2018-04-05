@@ -1,4 +1,9 @@
+const { BrowserWindow, dialog } = require('electron').remote;
+const fs = require('fs');
+const https = require('https');
+
 var audiolist = document.querySelector('.audiolist'),
+    audioplayer = document.querySelector('.audioplayer'),
     content = document.querySelector('.content'),
     player_cover = document.querySelector('.player_cover'),
     player_cover_img = document.querySelector('.player_cover_img'),
@@ -12,6 +17,8 @@ var audiolist = document.querySelector('.audiolist'),
 window.pageLoaded = 0, window.this_track_id = null;
 
 var load = (user, offset) => {
+  window.danyadev.user = user;
+  
   vkapi.method('audio.get', {
     offset: offset || 0,
     count: 15
@@ -19,13 +26,17 @@ var load = (user, offset) => {
     data = data.response;
   
     data.items.forEach(item => {
-      let cover, time = Math.floor(item.duration/60) + ':';
+      let cover, time = Math.floor(item.duration/60) + ':', downloadClass;
       
       if(item.album && item.album.thumb) cover = item.album.thumb.photo_68;
       else cover = 'https://vk.com/images/audio_row_placeholder.png';
       
       if((item.duration%60)<10) time += '0' + item.duration%60;
       else time += item.duration%60;
+      
+      if(fs.existsSync(window.danyadev.user.downloadPath + '\\' + item.artist + ' – ' + item.title + '.mp3'))
+        downloadClass = 'audio_downloaded'
+      else downloadClass = 'audio_download'
       
       audiolist.innerHTML += `
         <div class='audio_item' src='${item.url}' onclick='audio.toggleAudio(this, event)'>
@@ -37,12 +48,32 @@ var load = (user, offset) => {
           </div>
           <div class='audio_real_time' onclick='audio.toggleTime(this, event, "real")'>${time}</div>
           <div class='audio_played_time' onclick='audio.toggleTime(this, event, "played")'></div>
+          <div class='${downloadClass}' artist="${item.artist}" name="${item.title}" url="${item.url}" title='Скачать аудиозапись' 
+          onclick='audio.downloadAudio(this.attributes.artist.value, this.attributes.name.value, this.attributes.url.value, this)'
+          ></div>
         </div>
       `.trim();
     });
     
     getMoreSound(user, offset, data);
   });
+}
+
+var downloadAudio = (author, name, url, block) => {
+  if(block.classList.contains('audio_downloaded')) return;
+  setTimeout(() => {
+        file_name = author + ' – ' + name + '.mp3',
+        file = fs.createWriteStream(window.danyadev.user.downloadPath + '\\' + file_name);
+
+    https.get(url, res => {
+      res.on('data', data => file.write(data));
+      res.on('end', () => {
+        file.end();
+        block.classList.add('audio_downloaded');
+        block.classList.remove('audio_download');
+      });
+    });
+  }, 0);
 }
 
 var getMoreSound = (user, offset, data) => {
@@ -233,5 +264,6 @@ content.addEventListener('scroll', () => {
 module.exports = {
   load,
   toggleAudio,
-  toggleTime
+  toggleTime,
+  downloadAudio
 }

@@ -1,13 +1,49 @@
 const vkapi = require('./vkapi');
-const USERS_PATH = __dirname + '\/users.json';
-const keys = [
-  [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 0 Android
-  [3140623, 'VeWdmVclDCtn6ihuP1nt'], // 1 iPhone
-  [3682744, 'mY6CDUswIVdJLCD3j15n'], // 2 iPad
-  [3697615, 'AlVXZFMUqyrnABp8ncuU'], // 3 Windows
-  [2685278, 'lxhD8OD7dMsqtXIm5IUY'], // 4 Kate Mobile
-  [5027722, 'Skg1Tn1r2qEbbZIAJMx3']  // 5 VK Messenger
-];
+const utils = require('./utils');
+const USERS_PATH = utils.USERS_PATH;
+const MENU_WIDTH = utils.MENU_WIDTH;
+const keys = utils.keys;
+
+var menu_settings_item = document.querySelector('.menu_settings_item'),
+    modal_settings_wrapper = document.querySelector('.modal_settings_wrapper'),
+    menu = document.querySelector('.menu'),
+    modal_settings = document.querySelector('.modal_settings'),
+    settings_close = document.querySelector('.settings_close'),
+    settings_menu_item = document.querySelector('.settings_menu_item');
+    
+var toggleSettings = () => {
+  if(modal_settings_wrapper.style.display == 'none' || modal_settings_wrapper.style.display == '') {
+    modal_settings_wrapper.style.display = 'flex';
+    setTimeout(() => modal_settings_wrapper.style.opacity = 1, 0);
+  } else {
+    modal_settings_wrapper.style.opacity = 0;
+    setTimeout(() => modal_settings_wrapper.style.display = 'none', 400);
+  }
+}
+
+settings_close.addEventListener('click', toggleSettings);
+
+modal_settings_wrapper.addEventListener('click', e => {
+  if(e.target == modal_settings_wrapper) toggleSettings();
+});
+
+settings_menu_item.addEventListener('contextmenu', () => {
+  require('./utils.js').showContextMenu([
+    {
+      label: 'Открыть настройки',
+      click: () => settings_menu_item.click()
+    },
+    {
+      label: 'Открыть DevTools',
+      click: () => {
+        if(getCurrentWindow().isDevToolsOpened()) getCurrentWindow().closeDevTools();
+        else getCurrentWindow().openDevTools();
+        
+        menu.style.left = MENU_WIDTH;
+      }
+    }
+  ]);
+});
 
 var editOnline = data => {
   let users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf-8')), user;
@@ -28,9 +64,10 @@ var editOnline = data => {
     v: 5.73
   }, data => {
     // туто применение/включение капчи/ввода кода из смс
-  })
+  });
 }
 
-module.expots = {
-  editOnline
+module.exports = {
+  editOnline,
+  toggleSettings
 }

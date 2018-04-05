@@ -46,32 +46,33 @@ const https = require('https');
 const fs = require('fs');
 const querystring = require('querystring');
 const { getCurrentWindow } = require('electron').remote;
-const USERS_PATH = __dirname + '\/users.json';
+const utils = require('./utils');
+const USERS_PATH = utils.USERS_PATH;
 
-var keys = [
-  [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 0 Android
-  [3140623, 'VeWdmVclDCtn6ihuP1nt'], // 1 iPhone
-  [3682744, 'mY6CDUswIVdJLCD3j15n'], // 2 iPad
-  [3697615, 'AlVXZFMUqyrnABp8ncuU'], // 3 Windows
-  [2685278, 'lxhD8OD7dMsqtXIm5IUY'], // 4 Kate Mobile
-  [5027722, 'Skg1Tn1r2qEbbZIAJMx3']  // 5 VK Messenger
-],
-    toURL = obj => querystring.unescape(querystring.stringify(obj)),
-    toURLogin = obj => querystring.stringify(obj),
+var toURL = obj => querystring.unescape(querystring.stringify(obj)),
+    toURLEncode = obj => querystring.stringify(obj),
     md5 = data => require('crypto').createHash('md5').update(data).digest("hex"),
-    online_methods = ['account.setOnline', 'account.setOffline']; // возможно добавлю еще
+    online_methods = [
+      'account.setOnline', 'account.setOffline',
+      'messages.getDialogs', 'messages.send',
+      'messages.sendSticker', 'wall.post'
+    ];
+
+// newsfeed.get (без feed_type=top)
+// wall.post (без publish_date)
 
 var method = (method, params, callback) => {
   params = params || {};
   callback = callback || (data => console.log(data));
   params.v = params.v || 5.73;
-  let secret, active_user_id, users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf-8'));
-      
+  
+  let secret, id, users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf-8'));
+  
   Object.keys(users).forEach(user_id => {
-    if(users[user_id].active) active_user_id = user_id;
+    if(users[user_id].active) id = user_id;
   });
   
-  if(!active_user_id) {
+  if(!id && !params.secret) {
     getCurrentWindow().reload();
     return;
   }
@@ -80,11 +81,11 @@ var method = (method, params, callback) => {
     secret = params.secret;
     delete params.secret;
   } else if(online_methods.indexOf(method) != -1) {
-    secret = users[active_user_id].online.secret;
-    if(!params.access_token) params.access_token = users[active_user_id].online.access_token;
-  } else secret = users[active_user_id].secret;
+    secret = users[id].online.secret;
+    if(!params.access_token) params.access_token = users[id].online.access_token;
+  } else secret = users[id].secret;
   
-  if(!params.access_token) params.access_token = users[active_user_id].access_token;
+  if(!params.access_token) params.access_token = users[id].access_token;
   
   params.sig = md5('/method/' + method + '?' + toURL(params) + secret);
   
@@ -104,7 +105,7 @@ var method = (method, params, callback) => {
       
       if(body.error) {
         if(body.error.error_msg == 'User authorization failed: invalid session.') {
-          delete users[active_user_id];
+          delete users[id];
           if(Object.keys(users).length > 0) users[Object.keys(users)[0]].active = true;
           fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
           getCurrentWindow().reload();
@@ -123,8 +124,8 @@ var auth = (authInfo, callback) => {
   
   let reqData = {
     grant_type: 'password',
-    client_id: keys[authInfo.platform[0]][0],
-    client_secret: keys[authInfo.platform[0]][1],
+    client_id: 2274003, // Android ключики
+    client_secret: 'hHbZxrka2uZ6jB1inYsH',
     username: authInfo.login,
     password: authInfo.password,
     scope: 'nohttps,all',
@@ -144,7 +145,7 @@ var auth = (authInfo, callback) => {
   
   https.get({
     host: 'oauth.vk.com',
-    path: `/token/?${toURLogin(reqData)}`
+    path: `/token/?${toURLEncode(reqData)}`
   }, res => {
     let data = '';
 
@@ -161,8 +162,6 @@ var auth = (authInfo, callback) => {
         return;
       }
       
-      // Писать "Получение информации и пользователе"
-      
       vkapi.method('users.get', {
         access_token: data.access_token,
         user_id: data.user_id,
@@ -170,9 +169,6 @@ var auth = (authInfo, callback) => {
         fields: 'photo_100',
         v: 5.73
       }, user_info => {
-        // user data
-        // Писать получение токена для музыки
-        
         refreshToken({
           access_token: data.access_token,
           secret: data.secret
@@ -183,6 +179,7 @@ var auth = (authInfo, callback) => {
             platform: authInfo.platform,
             login: authInfo.login,
             password: authInfo.password,
+            downloadPath: process.env.USERPROFILE + '\\Downloads',
             first_name: user_info.response[0].first_name,
             last_name: user_info.response[0].last_name,
             photo_100: user_info.response[0].photo_100,

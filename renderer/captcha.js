@@ -1,5 +1,7 @@
 module.exports = (src, sid, callback) => {
-  let modal = document.querySelector('.captcha_modal');
+  let modal = document.createElement('div');
+  modal.classList.add('captcha_modal');
+  document.body.appendChild(modal);
   
   modal.innerHTML = `
     <div class="captcha">
@@ -18,8 +20,7 @@ module.exports = (src, sid, callback) => {
   img.src = src;
   img.addEventListener('click', () => img.src += ~img.src.indexOf("rnd=") ? "1" : "&rnd=1");
   btn.addEventListener('click', () => {
-    modal.innerHTML = '';
-    modal.style.display = 'none';
+    document.body.removeChild(modal);
     callback(input.value, sid);
   });
   

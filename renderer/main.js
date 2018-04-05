@@ -29,30 +29,38 @@ const fs = require('fs');
 const vkapi = require('./vkapi');
 const audio = require('./audio');
 const captcha = require('./captcha');
-const USERS_PATH = __dirname + '\/users.json';
-const MENU_WIDTH = '-260px';
+const settings = require('./settings');
+const utils = require('./utils');
+const USERS_PATH = utils.USERS_PATH;
+const MENU_WIDTH = utils.MENU_WIDTH;
+
+window.danyadev = {};
 
 var header = document.querySelector('.header'),
     menu_items = document.querySelector('.menu'),
     content = document.querySelector('.content'),
     wrapper_login = document.querySelector('.wrapper_login'),
     wrapper_content = document.querySelector('.wrapper_content'),
-    audioplayer = document.querySelector('.audioplayer'),
     open_menu = document.querySelector('.open_menu'),
     open_menu_icon = document.querySelector('.open_menu_icon'),
     menu = document.querySelector('.menu'),
     account_icon = document.querySelector('.acc_icon'),
     full_name = document.querySelector('.menu_acc_name'),
     acc_status = document.querySelector('.menu_acc_status'),
-    menu_account_bgc = document.querySelector('.menu_account_bgc');
+    menu_account_bgc = document.querySelector('.menu_account_bgc'),
+    open_devTools = document.querySelector('.open_devTools'),
+    settings_tabs = document.querySelector('.settings_tabs'),
+    settings_content = document.querySelector('.settings_content');
     
-// функция, которая запускает все части клиента
-var startVK = (users, user) => {
+var init = (users, user) => {
   account_icon.style.backgroundImage = menu_account_bgc.style.backgroundImage = `url('${user.photo_100}')`;
   full_name.innerHTML = `${user.first_name} ${user.last_name}`;
   
-  setTimeout(() => vkapi.method('users.get', { fields: 'status' }, 
-           data => acc_status.innerHTML = data.response[0].status), 350);
+  vkapi.method('users.get', {
+    fields: 'status'
+  }, data => acc_status.innerHTML = data.response[0].status);
+  
+  require('./settings');
   
   let loadAudio = () => {
     setTimeout(() => audio.load(user), 600);
@@ -68,14 +76,13 @@ content.children[0].classList.add('content_active');
 [].slice.call(menu_items.children).forEach(item => {
   item.addEventListener('click', function() {
     let tab = [].slice.call(menu_items.children).indexOf(this);
-    if(tab == 0) return;
+    if(tab == 0) return; // если это блок юзера
     
     menu.style.left = MENU_WIDTH;
     if(document.querySelector('.menu_item_active') == this) return;
     
-    if(tab == 9) {
-      if(getCurrentWindow().isDevToolsOpened()) getCurrentWindow().closeDevTools();
-      else getCurrentWindow().openDevTools();
+    if(tab == 9) { // если это настройки
+      settings.toggleSettings();
       return;
     }
 
@@ -86,6 +93,27 @@ content.children[0].classList.add('content_active');
     content.children[tab].classList.add('content_active');
   });
 });
+
+settings_tabs.children[0].classList.add('settings_tab_active');
+settings_content.children[0].classList.add('settings_content_active');
+
+[].slice.call(settings_tabs.children).forEach(tab => {
+  tab.addEventListener('click', function() {
+    let tab = [].slice.call(settings_tabs.children).indexOf(this);
+    if(document.querySelector('.settings_tab_active') == this) return;
+
+    document.querySelector('.settings_tab_active').classList.remove('settings_tab_active');
+    document.querySelector('.settings_content_active').classList.remove('settings_content_active');
+
+    settings_tabs.children[tab].classList.add('settings_tab_active');
+    settings_content.children[tab].classList.add('settings_content_active');
+  });
+});
+
+open_devTools.addEventListener('click', () => {
+  if(getCurrentWindow().isDevToolsOpened()) getCurrentWindow().closeDevTools();
+  else getCurrentWindow().openDevTools();
+})
 
 menu.style.left = MENU_WIDTH; // первично скрываем панельку
 
@@ -123,6 +151,7 @@ document.querySelectorAll('a').forEach(link => {
 if(!fs.existsSync(USERS_PATH)) fs.writeFileSync(USERS_PATH, '{}');
 
 var users = fs.readFileSync(USERS_PATH, 'utf-8');
+
 if(users.trim() == '') {
   users = {};
   fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
@@ -130,14 +159,10 @@ if(users.trim() == '') {
 
 if(Object.keys(users).length >= 1) { // если есть хоть 1 юзер, то идем дальше
   wrapper_content.style.display = 'block';
-  
-  let keys = Object.keys(users), user_id;
-  keys.forEach(key => { if(users[key].active) user_id = key });
-  
-  startVK(users, users[user_id]);
+  // по идее active только один
+  Object.keys(users).forEach(key => { if(users[key].active) init(users, users[key]) });
 } else { // если нет, то вставляем форму авторизации
-  let input_form = document.querySelector('.input_form'),
-      login_input = document.querySelector('.login_input'),
+  let login_input = document.querySelector('.login_input'),
       password_input = document.querySelector('.password_input input'),
       show_password = document.querySelector('.show_password'),
       twofa_info = document.querySelector('.twofa_info'),
@@ -149,7 +174,7 @@ if(Object.keys(users).length >= 1) { // если есть хоть 1 юзер, �
   
   // кнопка для показа и скрытия пароля
   show_password.addEventListener('click', () => {
-    if([].slice.call(show_password.classList).indexOf('active') != -1) {
+    if(show_password.classList.contains('active')) {
       show_password.classList.remove('active');
       password_input.type = 'password';
     } else {
@@ -159,17 +184,15 @@ if(Object.keys(users).length >= 1) { // если есть хоть 1 юзер, �
   });
   
   login_input.onkeydown = password_input.onkeydown = e => {
-    if(e.keyCode == 13 && !login_button.hasAttribute('disabled')) login_button.click();
+    if(e.keyCode == 13) login_button.click();
   }
   
   sms_code.onkeydown = e => { if(e.keyCode == 13) login_button.click() }
 
   login_input.oninput = password_input.oninput = () => {
-    if(login_input.value.trim() != '' &&
+    if(login_input.value.trim()    != '' &&
        password_input.value.trim() != '' &&
-       login_button.hasAttribute('disabled')) {
-      login_button.removeAttribute('disabled');
-    }
+       login_button.hasAttribute('disabled')) login_button.removeAttribute('disabled');
     
     if(login_input.value.trim() == '' || password_input.value.trim() == '')
       login_button.setAttribute('disabled', '');
@@ -193,9 +216,8 @@ if(Object.keys(users).length >= 1) { // если есть хоть 1 юзер, �
       login_button.removeAttribute('disabled');
       
       if(data.error) {
-        if(data.error == 'need_captcha') {
+        if(data.error == 'need_captcha') 
           captcha(data.captcha_img, data.captcha_sid, (key, sid) => auth({key, sid}));
-        }
         
         if(data.error_description == 'Username or password is incorrect')
           error_info.innerHTML = 'Неверный логин или пароль';
@@ -220,7 +242,7 @@ if(Object.keys(users).length >= 1) { // если есть хоть 1 юзер, �
       let keys = Object.keys(users), user_id;
       keys.forEach(key => { if(users[key].active) user_id = key });
       
-      startVK(users, users[user_id]);
+      init(users, users[user_id]);
     });
   }
 }

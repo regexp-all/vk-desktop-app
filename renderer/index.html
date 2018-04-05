@@ -8,6 +8,7 @@
   </head>
   <body>
     <div class="wrapper_login">
+      <div class="open_devTools" title='Открыть DevTools'></div>
       <div class="login_title">ВКонтакте</div>
       <div class="input_form">
         <input type="text" placeholder="Введите логин" class='login_input' autofocus>
@@ -25,9 +26,24 @@
         Платформа по умолчанию - Android.<br>
         Ее можно изменить в настройках.
       </div>
-      <div class="captcha_modal"></div>
     </div>
     <div class="wrapper_content">
+      <div class="modal_settings_wrapper">
+        <div class="modal_settings">
+          <div class="settings_header">
+            <div class="settings_title">Настройки</div>
+            <div class="settings_close"></div>
+            <div class="settings_tabs">
+              <div class="settings_tab">Основные</div>
+              <div class="settings_tab">О программе</div>
+            </div>
+          </div>
+          <div class="settings_content">
+            <div class='settings_item_content'>Чо добавить тут то</div>
+            <div class='settings_item_content'>Создатель - <a href='https://vk.com/danyadev'>Данил</a></div>
+          </div>
+        </div>
+      </div>
       <div class="header">
         <div class="open_menu"><div class="open_menu_icon"></div></div>
         <!-- сюда чота добавить -->
@@ -50,7 +66,7 @@
         </div>
         <div class="menu_item">
           <div class="menu_icon menu_music_icon"></div>
-          <div class="menu_item_name">Музыка</div>
+          <div class="menu_item_name">Аудиозаписи</div>
         </div>
         <div class="menu_item">
           <div class="menu_icon menu_notify_icon"></div>
@@ -72,7 +88,7 @@
           <div class="menu_icon menu_videos_icon"></div>
           <div class="menu_item_name">Видеозаписи</div>
         </div>
-        <div class="menu_item">
+        <div class="menu_item settings_menu_item">
           <div class="menu_icon menu_settings_icon"></div>
           <div class="menu_item_name">Настройки</div>
         </div>
@@ -108,17 +124,6 @@
         <div class="tab_content">Группы</div>
         <div class="tab_content">Фотографии</div>
         <div class="tab_content">Видеозаписи</div>
-        <!-- <div class="tab_content content_settings">
-          Платформа: 
-          <select class='platform'>
-           <option>Android</option>
-           <option>iPhone</option>
-           <option>iPad</option>
-           <option>Windows</option>
-           <option>Kate Mobile</option>
-           <option>VK Messenger</option>
-         </select>
-        </div> -->
       </div>
     </div>
   </body>
