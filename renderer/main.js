@@ -65,6 +65,7 @@ window.addEventListener('beforeunload', () => {
   let settings_json = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'));
   
   settings_json.window = getCurrentWindow().getBounds();
+  settings_json.audio.volume = document.querySelector('.audio').volume;
   
   fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings_json, null, 2));
 });

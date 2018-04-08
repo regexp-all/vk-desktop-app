@@ -23,23 +23,32 @@
 
 'use strict';
 
-const { BrowserWindow, dialog } = require('electron').remote;
+const { BrowserWindow } = require('electron').remote;
 const fs = require('fs');
 const https = require('https');
+const SETTINGS_PATH = require('./utils').SETTINGS_PATH;
 
 danyadev.audio = {};
 
-var audiolist = document.querySelector('.audiolist'),
+var audio = document.querySelector('.audio'),
+    audiolist = document.querySelector('.audiolist'),
     audioplayer = document.querySelector('.audioplayer'),
     content = document.querySelector('.content'),
     player_cover = document.querySelector('.player_cover'),
-    player_cover_img = document.querySelector('.player_cover_img'),
     player_btn = document.querySelector('.player_btn'),
     player_back = document.querySelectorAll('.player_button')[0],
     player_next = document.querySelectorAll('.player_button')[1],
     player_author = document.querySelector('.player_author'),
     player_name = document.querySelector('.player_name'),
-    audio = document.querySelector('.audio');
+    player_progress_loaded = document.querySelector('.player_progress_loaded'),
+    player_progress_all = document.querySelector('.player_progress_all'),
+    player_progress_played = document.querySelector('.player_progress_played'),
+    player_progress_wrap = document.querySelector('.player_progress_wrap'),
+    player_volume_wrap = document.querySelector('.player_volume_wrap'),
+    player_util_volume_this = document.querySelector('.player_util_volume_this'),
+    settings_json = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'));
+    
+player_util_volume_this.style.width = settings_json.audio.volume * 100 + '%';
 
 danyadev.audio.audioLoaded = 0, danyadev.audio.this_track_id = 0;
 
@@ -132,8 +141,8 @@ var toggleAudio = (track, event) => {
     }
     
     if(track.children[0].children[0].style.backgroundImage != 'url("https://vk.com/images/audio_row_placeholder.png")')
-      player_cover_img.style.backgroundImage = track.children[0].children[0].style.backgroundImage;
-    else player_cover_img.style.backgroundImage = '';
+      player_cover.style.backgroundImage = track.children[0].children[0].style.backgroundImage;
+    else player_cover.style.backgroundImage = 'url("images/empty_cover.svg")';
     
     player_name.innerHTML = '<span class=\'player_author\'>'
                           + audio.audio_item.children[1].children[1].innerHTML
@@ -149,6 +158,9 @@ var toggleAudio = (track, event) => {
     if(document.querySelector('.player_play')) {
       document.querySelector('.player_play').classList.add('player_pause');
       document.querySelector('.player_play').classList.remove('player_play');
+    } else {
+      player_progress_loaded.style.width = '';
+      player_progress_played.style.width = '';
     }
     
     audio.play();
@@ -202,8 +214,8 @@ var getMoreSound = (user, offset, data) => {
   if(!audio.audio_item) {
     audio.audio_item = audiolist.children[0]; // первая песня в плейлисте
     if(audio.audio_item.children[0].children[0].style.backgroundImage != 'url("https://vk.com/images/audio_row_placeholder.png")')
-      player_cover_img.style.backgroundImage = audio.audio_item.children[0].children[0].style.backgroundImage;
-    else player_cover_img.style.backgroundImage = '';
+      player_cover.style.backgroundImage = audio.audio_item.children[0].children[0].style.backgroundImage;
+    else player_cover.style.backgroundImage = 'url("images/empty_cover.svg")';
     
     player_name.innerHTML = '<span class=\'player_author\'>'
                           + audio.audio_item.children[1].children[1].innerHTML
@@ -300,10 +312,52 @@ content.addEventListener('scroll', () => {
   }
 });
 
-// audio.addEventListener("progress", () => {
-//     var buffered = Math.floor(audio.buffered.end(0)) / Math.floor(audio.duration);
-//     что увеличиваем.style.width =  Math.floor(buffered * полная ширина) + "px";
-// });
+audio.addEventListener('progress', () => { // сколько прогружено
+  if(audio.buffered.length > 0) {
+    player_progress_loaded.style.width = audio.buffered.end(0) / audio.duration * 100 + '%';
+  }
+});
+
+audio.addEventListener('timeupdate', () => { // сколько проиграно
+  if(!danyadev.audio.seekstate)
+    player_progress_played.style.width = (audio.currentTime / audio.duration) * 100 + '%';
+});
+
+// прокрутка трека
+player_progress_wrap.addEventListener('mousedown', () => danyadev.audio.seekstate = 1);
+
+player_progress_wrap.addEventListener('mousemove', e => {
+  if(e.buttons != 1) return;
+  
+  let curTime = (e.offsetX * audio.duration) / player_progress_wrap.offsetWidth;
+  player_progress_played.style.width = (curTime / audio.duration) * 100 + '%';
+});
+
+player_progress_wrap.addEventListener('mouseup', e => {
+  danyadev.audio.seekstate = 0;
+  audio.currentTime = (e.offsetX * audio.duration) / player_progress_wrap.offsetWidth;
+});
+
+// громкость
+player_volume_wrap.addEventListener('mousedown', e => {
+  audio.volume = (e.offsetX / player_volume_wrap.offsetWidth);
+  player_util_volume_this.style.width = audio.volume * 100 + '%'
+});
+
+player_volume_wrap.addEventListener('mousemove', e => {
+  if(e.buttons != 1) return;
+  
+  audio.volume = (e.offsetX / player_volume_wrap.offsetWidth);
+  player_util_volume_this.style.width = audio.volume * 100 + '%'
+});
+
+/*
+И напоследок метод перемешивания списка:
+
+Playlist.prototype.shuffle = function(){
+	for(var j, x, i = this.list.length; i; j = Math.floor(Math.random() * i), x = this.list[--i], this.list[i] = this.list[j], this.list[j] = x);
+};
+*/
 
 module.exports = {
   init, load,

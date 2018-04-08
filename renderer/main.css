@@ -373,16 +373,6 @@ body {
   background-image: url('images/empty_cover.svg');
 }
 
-.player_cover_img {
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  border-radius: 4px;
-  background-repeat: no-repeat;
-  background-position: 50%;
-  background-size: cover;
-}
-
 .btns { height: 50px; width: 78px; float: left }
 
 .player_play {
@@ -427,13 +417,104 @@ body {
   background-image: url('images/player_next.svg');
 }
 
-.player_name_line { padding-top: 5px }
+.player_name_line {
+  float: left;                   /* 128px */
+  width: calc(100% - 188px); /* 50px + 78px + ширина кнопок px */
+  height: 100%;
+  padding: 0 3px 0 3px;
+}
+
 .player_author { font-weight: 500 }
+
+.player_name, .player_progress { margin-top: 8px }
 
 .player_name {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.player_progress_wrap {
+  cursor: pointer;
+  padding-bottom: 14px;
+}
+
+.player_progress {
+  height: 3px;
+  position: relative;
+}
+
+.player_progress_all {
+  background-color: #e1e8ee;
+  height: 100%;
+}
+
+.player_progress_loaded {
+  background-color: #b8c7d7;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: width .6s;
+}
+
+.player_progress_played {
+  background-color: #5181b8;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.player_utils {
+  float: left;
+  width: 60px;
+  height: 100%;
+  padding-left: 3px;
+}
+
+.player_util_icons, .player_util_volume { margin-top: 6.5px }
+
+.player_util_icons {
+  /* width: 24px;
+  height: 22px;
+  -webkit-mask-size: cover;
+  -webkit-mask-image: url('images/audio_repeat.png'); */
+}
+
+.player_icon {
+  width: 24px;
+  height: 22px;
+  -webkit-mask-size: cover;
+  -webkit-mask-image: url('images/audio_repeat.png');
+}
+
+.player_icon_repeat {
+  background-color: #949494
+}
+
+.player_volume_wrap {
+  cursor: pointer;
+  padding-bottom: 14px;
+  width: 50px;
+}
+
+.player_util_volume {
+  position: relative;
+  height: 3px;
+}
+
+.player_util_volume_all {
+  background-color: #e1e8ee;
+  height: 100%;
+}
+
+.player_util_volume_this {
+  background-color: #5181b8;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .audiolist {

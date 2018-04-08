@@ -44,12 +44,17 @@ const fs = require('fs');
 const utils = require('./renderer/utils');
 const SETTINGS_PATH = utils.SETTINGS_PATH;
 
-var settings = { window: { width: 720, height: 480 } };
+var settings = {
+  window: { width: 720, height: 480 },
+  audio: { volume: 0.63 }
+};
 
 if(!fs.existsSync(SETTINGS_PATH)) fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
 else {
   let _settings = fs.readFileSync(SETTINGS_PATH, 'utf-8');
   if(_settings == '' || _settings == '{}') {
+    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+  } else if(!JSON.parse(_settings).audio){
     fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
   } else settings = JSON.parse(_settings);
 }
