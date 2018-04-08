@@ -1,4 +1,29 @@
-const { Menu, getCurrentWindow } = require('electron').remote;
+/* 
+  Copyright © 2018 danyadev
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+
+/* Контактные данные:
+   vk: https://vk.com/danyadev
+   telegram: https://t.me/danyadev
+   email: nemov.danil@mail.ru
+   github: https://github.com/danyadev/vk-desktop-app
+*/
+
+'use strict';
+
+const { Menu, getCurrentWindow } = require('electron').remote ? require('electron').remote : require('electron');
 
 var showContextMenu = template => {
   Menu.buildFromTemplate(template).popup(getCurrentWindow());
@@ -7,6 +32,7 @@ var showContextMenu = template => {
 module.exports = {
   showContextMenu,
   USERS_PATH: __dirname + '\/users.json',
+  SETTINGS_PATH: __dirname + '\/settings.json',
   MENU_WIDTH: '-260px',
   keys: [
     [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 0  Android

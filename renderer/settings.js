@@ -1,37 +1,41 @@
+/* 
+  Copyright © 2018 danyadev
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
+
+/* Контактные данные:
+   vk: https://vk.com/danyadev
+   telegram: https://t.me/danyadev
+   email: nemov.danil@mail.ru
+   github: https://github.com/danyadev/vk-desktop-app
+*/
+
+'use strict';
+
 const vkapi = require('./vkapi');
 const utils = require('./utils');
 const USERS_PATH = utils.USERS_PATH;
 const MENU_WIDTH = utils.MENU_WIDTH;
 const keys = utils.keys;
 
-var menu_settings_item = document.querySelector('.menu_settings_item'),
-    modal_settings_wrapper = document.querySelector('.modal_settings_wrapper'),
-    menu = document.querySelector('.menu'),
-    modal_settings = document.querySelector('.modal_settings'),
-    settings_close = document.querySelector('.settings_close'),
-    settings_menu_item = document.querySelector('.settings_menu_item');
-    
-var toggleSettings = () => {
-  if(modal_settings_wrapper.style.display == 'none' || modal_settings_wrapper.style.display == '') {
-    modal_settings_wrapper.style.display = 'flex';
-    setTimeout(() => modal_settings_wrapper.style.opacity = 1, 0);
-  } else {
-    modal_settings_wrapper.style.opacity = 0;
-    setTimeout(() => modal_settings_wrapper.style.display = 'none', 400);
-  }
-}
+var settings_item = document.querySelector('.settings_item');
 
-settings_close.addEventListener('click', toggleSettings);
-
-modal_settings_wrapper.addEventListener('click', e => {
-  if(e.target == modal_settings_wrapper) toggleSettings();
-});
-
-settings_menu_item.addEventListener('contextmenu', () => {
+settings_item.addEventListener('contextmenu', () => {
   require('./utils.js').showContextMenu([
     {
       label: 'Открыть настройки',
-      click: () => settings_menu_item.click()
+      click: () => settings_item.click()
     },
     {
       label: 'Открыть DevTools',
@@ -68,6 +72,5 @@ var editOnline = data => {
 }
 
 module.exports = {
-  editOnline,
-  toggleSettings
+  editOnline
 }

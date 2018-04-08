@@ -25,8 +25,6 @@
 // отключение предупреждения в консоли
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
 
-const { app, BrowserWindow } = require('electron');
-
 try {
   require('./../reload/node_modules/electron-reload')(__dirname, {
     ignored: [
@@ -34,24 +32,47 @@ try {
       __dirname + '/index.js',
       __dirname + '/LICENSE',
       __dirname + '/renderer/users.json',
+      __dirname + '/renderer/settings.json',
       __dirname + '/README.md',
       __dirname + '/node_modules',
       __dirname + '/package.json'
     ]
 })} catch(e){}
 
+const { app, BrowserWindow } = require('electron');
+const fs = require('fs');
+const utils = require('./renderer/utils');
+const SETTINGS_PATH = utils.SETTINGS_PATH;
+
+var settings = { window: { width: 720, height: 480 } };
+
+if(!fs.existsSync(SETTINGS_PATH)) fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+else {
+  let _settings = fs.readFileSync(SETTINGS_PATH, 'utf-8');
+  if(_settings == '' || _settings == '{}') {
+    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+  } else settings = JSON.parse(_settings);
+}
+
 app.on('window-all-closed', () => {
   if(process.platform != 'darwin') app.quit();
 });
 
 app.on('ready', () => {
-  win = new BrowserWindow({
-    width: 720,
-    height: 480,
+  let winOpts = {
+    width: settings.window.width,
+    height: settings.window.height,
     minWidth: 620,
     minHeight: 480,
     show: false
-  });
+  }
+  
+  if(settings.window.x != undefined && settings.window.y != undefined) {
+    winOpts.x = settings.window.x < 0 ? 0 : settings.window.x;
+    winOpts.y = settings.window.y < 0 ? 0 : settings.window.y;
+  }
+  
+  win = new BrowserWindow(winOpts);
   
   win.setMenu(null);
   win.loadFile('renderer/index.html');

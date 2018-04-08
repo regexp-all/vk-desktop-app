@@ -17,8 +17,7 @@
 /* Контактные данные:
    vk: https://vk.com/danyadev
    telegram: https://t.me/danyadev
-   email: danyadev@mail.ru
-   gmail: danyadev0@gmail.com
+   email: nemov.danil@mail.ru
    github: https://github.com/danyadev/vk-desktop-app
 */
 
@@ -62,9 +61,9 @@ var toURL = obj => querystring.unescape(querystring.stringify(obj)),
 // wall.post (без publish_date)
 
 var method = (method, params, callback) => {
-  params = params || {};
-  callback = callback || (data => console.log(data));
-  params.v = params.v || 5.73;
+  params   = params   || {};
+  callback = callback || (data => {});
+  params.v = params.v || 5.74;
   
   let secret, id, users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf-8'));
   
@@ -102,9 +101,11 @@ var method = (method, params, callback) => {
     res.on('data', chunk => body += chunk);
     res.on('end', () => {
       body = JSON.parse(body);
+      console.log(body);
       
       if(body.error) {
         if(body.error.error_msg == 'User authorization failed: invalid session.') {
+          // можно будет выводить окошечко
           delete users[id];
           if(Object.keys(users).length > 0) users[Object.keys(users)[0]].active = true;
           fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
@@ -114,7 +115,10 @@ var method = (method, params, callback) => {
       
       callback(body);
     });
-  }).end();
+  }).on('error', err => {
+    // ошибки типа нет инета, долго нет ответа итд
+    console.log(err);
+  }).end()
 }
 
 var auth = (authInfo, callback) => {
@@ -131,7 +135,7 @@ var auth = (authInfo, callback) => {
     scope: 'nohttps,all',
     '2fa_supported': true,
     force_sms: true,
-    v: authInfo.v || 5.73
+    v: authInfo.v || 5.74
   }
   
   if(authInfo.captcha_sid && authInfo.captcha_key) {
@@ -167,7 +171,7 @@ var auth = (authInfo, callback) => {
         user_id: data.user_id,
         secret: data.secret,
         fields: 'photo_100',
-        v: 5.73
+        v: 5.74
       }, user_info => {
         refreshToken({
           access_token: data.access_token,
@@ -209,7 +213,7 @@ var refreshToken = (data, callback) => {
     access_token: data.access_token,
     secret: data.secret,
     receipt: 'JSv5FBbXbY:APA91bF2K9B0eh61f2WaTZvm62GOHon3-vElmVq54ZOL5PHpFkIc85WQUxUH_wae8YEUKkEzLCcUC5V4bTWNNPbjTxgZRvQ-PLONDMZWo_6hwiqhlMM7gIZHM2K2KhvX-9oCcyD1ERw4',
-    v: 5.73
+    v: 5.74
   }, ref => callback({ access_token: ref.response.token, secret: ref.response.secret }))
 };
 
@@ -227,7 +231,7 @@ var resetOnline = (authInfo, callback) => {
     scope: 'nohttps,all',
     '2fa_supported': true,
     force_sms: true,
-    v: authInfo.v || 5.73
+    v: authInfo.v || 5.74
   }
   
   if(authInfo.captcha_sid && authInfo.captcha_key) {

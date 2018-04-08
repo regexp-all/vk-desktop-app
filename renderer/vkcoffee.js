@@ -1,5 +1,5 @@
 var data = {};
-var CryptoJS = CryptoJS || function(u, p) {
+var CryptoJS = function(u, p) {
   var d = {},
     l = d.lib = {},
     s = function() {},
@@ -109,6 +109,7 @@ var CryptoJS = CryptoJS || function(u, p) {
   var n = d.algo = {};
   return d
 }(Math);
+
 (function() {
   var u = CryptoJS,
     p = u.lib.WordArray;
@@ -355,6 +356,7 @@ CryptoJS.lib.Cipher || function(u) {
     });
   u.AES = p._createHelper(d)
 })();
+
 CryptoJS.mode.ECB = function() {
   var a = CryptoJS.lib.BlockCipherMode.extend();
   a.Encryptor = a.extend({
@@ -371,37 +373,38 @@ CryptoJS.mode.ECB = function() {
 }();
 
 String.prototype.escape = function() {
-  var tagsToReplace = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
+  let tagsToReplace = {
+    '&':  '&amp;',
+    '<':  '&lt;',
+    '>':  '&gt;',
     '\n': '<br>'
   };
-  return this.replace(/[&<>\n]/g, function(tag) {
-    return tagsToReplace[tag] || tag;
-  });
+  
+  return this.replace(/[&<>\n]/g, tag => tagsToReplace[tag] || tag);
 };
+
 String.prototype.hexEncode = function() {
-  var hex = '';
-  for (var i = 0; i < this.length; i++) {
-    var c = this.charCodeAt(i);
+  let hex = '';
+  
+  for(let i = 0; i < this.length; i++) {
+    let c = this.charCodeAt(i);
     if (c > 0xFF) c -= 0x350;
     hex += c.toString(16) + ' ';
   }
+  
   return hex;
 };
 
 String.prototype.hexDecode = function() {
-  var hex = this.toString();
-  var str = '';
-  for (var i = 0; i < hex.length; i += 2) str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  let hex = this.toString(), str = '';
+  
+  for(let i = 0; i < hex.length; i += 2) str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  
   return str;
 };
 
 data.COFFEE = {
-  key: (_ = ([][
-    []
-  ] + [] + ![] + !![] + {}), p = -~[], q = p++, w = p++, e = p++, r = p++, t = p++, y = p++, u = p++, i = p++, o = p++, p = 0, [] + _[o + e] + _[o + t] + _[p] + "p" + _[t] + _[w] + "U" + _[o + e] + _[e] + _[o + y] + _[o + e] + "M" + _[p] + _[o + e] + _[o + t] + "D"),
+  key: (_ = ([][[]] + [] + ![] + !![] + {}), p = -~[], q = p++, w = p++, e = p++, r = p++, t = p++, y = p++, u = p++, i = p++, o = p++, p = 0, [] + _[o + e] + _[o + t] + _[p] + "p" + _[t] + _[w] + "U" + _[o + e] + _[e] + _[o + y] + _[o + e] + "M" + _[p] + _[o + e] + _[o + t] + "D"),
   check: function(s) {
     s = s.match(/^(AP ID OG|PP|VK CO FF EE|VK C0 FF EE|II) ([A-F0-9\s]+) (AP ID OG|PP|VK CO FF EE|VK C0 FF EE|II)$/);
     return (!s || s.length !== 4) ? 0 : [(s[1] == "VK C0 FF EE" ? 1 : 0), s[2]];
@@ -416,9 +419,7 @@ data.COFFEE = {
           padding: CryptoJS.pad.Pkcs7,
           keySize: 4
         }).toString().substr(0, 16)
-      } else {
-        key = data.COFFEE.key;
-      }
+      } else key = data.COFFEE.key;
       return CryptoJS.AES.decrypt((c[1].split(" ").join("").hexDecode()), CryptoJS.enc.Utf8.parse(key), {
         mode: CryptoJS.mode.ECB,
         padding: CryptoJS.pad.Pkcs7,
@@ -428,23 +429,25 @@ data.COFFEE = {
       return false;
     }
   },
-  encrypt: function(decrypted, key, minified) {
+  encrypt: function(decrypted, key, secret_token) {
     let vkcoffee;
-    if (key) {
-      vkcoffee = minified ? 'PP ': 'VK C0 FF EE ';
+    
+    if(key) {
+      vkcoffee = (key || !key) && secret_token ? atob('UFAg') : atob('VksgQzAgRkYgRUUg');
       key = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(key + "mailRuMustDie"), CryptoJS.enc.Utf8.parse(data.COFFEE.key), {
         mode: CryptoJS.mode.ECB,
         padding: CryptoJS.pad.Pkcs7,
         keySize: 4
-      }).toString().substr(0, 16)
+      }).toString().substr(0, 16);
     } else {
-      vkcoffee = minified ? 'II ' : 'VK CO FF EE ';
+      vkcoffee = (key || !key) && secret_token ? atob('SUkg') : atob('VksgQ08gRkYgRUUg');
       key = data.COFFEE.key;
     }
+    
     return vkcoffee + CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(decrypted), CryptoJS.enc.Utf8.parse(key), {
       mode: CryptoJS.mode.ECB,
       padding: CryptoJS.pad.Pkcs7,
-      keySize: 128 / 32
+      keySize: 4
     }).toString().hexEncode().toUpperCase() + vkcoffee.trim();
   }
 };

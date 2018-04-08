@@ -17,8 +17,7 @@
 /* Контактные данные:
    vk: https://vk.com/danyadev
    telegram: https://t.me/danyadev
-   email: danyadev@mail.ru
-   gmail: danyadev0@gmail.com
+   email: nemov.danil@mail.ru
    github: https://github.com/danyadev/vk-desktop-app
 */
 
@@ -26,15 +25,15 @@
 
 const { shell, getCurrentWindow } = require('electron').remote;
 const fs = require('fs');
+const danyadev = {};
 const vkapi = require('./vkapi');
 const audio = require('./audio');
 const captcha = require('./captcha');
 const settings = require('./settings');
 const utils = require('./utils');
 const USERS_PATH = utils.USERS_PATH;
+const SETTINGS_PATH = utils.SETTINGS_PATH;
 const MENU_WIDTH = utils.MENU_WIDTH;
-
-window.danyadev = {};
 
 var header = document.querySelector('.header'),
     menu_items = document.querySelector('.menu'),
@@ -48,27 +47,27 @@ var header = document.querySelector('.header'),
     full_name = document.querySelector('.menu_acc_name'),
     acc_status = document.querySelector('.menu_acc_status'),
     menu_account_bgc = document.querySelector('.menu_account_bgc'),
-    open_devTools = document.querySelector('.open_devTools'),
-    settings_tabs = document.querySelector('.settings_tabs'),
-    settings_content = document.querySelector('.settings_content');
+    open_devTools = document.querySelector('.open_devTools');
     
 var init = (users, user) => {
   account_icon.style.backgroundImage = menu_account_bgc.style.backgroundImage = `url('${user.photo_100}')`;
   full_name.innerHTML = `${user.first_name} ${user.last_name}`;
   
-  vkapi.method('users.get', {
-    fields: 'status'
-  }, data => acc_status.innerHTML = data.response[0].status);
+  vkapi.method('users.get', { fields: 'status' }, data => acc_status.innerHTML = data.response[0].status);
+  
+  menu_items.children[3].addEventListener('click', () => audio.load(user), { once: true });
   
   require('./settings');
-  
-  let loadAudio = () => {
-    setTimeout(() => audio.load(user), 600);
-    menu_items.children[3].removeEventListener('click', loadAudio);
-  }
-  
-  menu_items.children[3].addEventListener('click', loadAudio);
 }
+
+
+window.addEventListener('beforeunload', () => {
+  let settings_json = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'));
+  
+  settings_json.window = getCurrentWindow().getBounds();
+  
+  fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings_json, null, 2));
+});
 
 menu_items.children[0].classList.add('menu_item_active');
 content.children[0].classList.add('content_active');
@@ -80,33 +79,12 @@ content.children[0].classList.add('content_active');
     
     menu.style.left = MENU_WIDTH;
     if(document.querySelector('.menu_item_active') == this) return;
-    
-    if(tab == 9) { // если это настройки
-      settings.toggleSettings();
-      return;
-    }
 
     document.querySelector('.menu_item_active').classList.remove('menu_item_active');
     document.querySelector('.content_active').classList.remove('content_active');
 
     menu_items.children[tab].classList.add('menu_item_active');
     content.children[tab].classList.add('content_active');
-  });
-});
-
-settings_tabs.children[0].classList.add('settings_tab_active');
-settings_content.children[0].classList.add('settings_content_active');
-
-[].slice.call(settings_tabs.children).forEach(tab => {
-  tab.addEventListener('click', function() {
-    let tab = [].slice.call(settings_tabs.children).indexOf(this);
-    if(document.querySelector('.settings_tab_active') == this) return;
-
-    document.querySelector('.settings_tab_active').classList.remove('settings_tab_active');
-    document.querySelector('.settings_content_active').classList.remove('settings_content_active');
-
-    settings_tabs.children[tab].classList.add('settings_tab_active');
-    settings_content.children[tab].classList.add('settings_content_active');
   });
 });
 
