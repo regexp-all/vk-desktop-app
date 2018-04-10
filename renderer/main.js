@@ -53,7 +53,10 @@ var init = (users, user) => {
   account_icon.style.backgroundImage = menu_account_bgc.style.backgroundImage = `url('${user.photo_100}')`;
   full_name.innerHTML = `${user.first_name} ${user.last_name}`;
   
-  vkapi.method('users.get', { fields: 'status' }, data => acc_status.innerHTML = data.response[0].status);
+  vkapi.method('users.get', { fields: 'status,photo_100' }, data => {
+    acc_status.innerHTML = data.response[0].status;
+    // проверять имена и фотки каждого юзера
+  });
   
   menu_items.children[3].addEventListener('click', () => audio.load(user), { once: true });
   
@@ -136,9 +139,8 @@ if(users.trim() == '') {
   fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
 } else users = JSON.parse(users);
 
-if(Object.keys(users).length >= 1) { // если есть хоть 1 юзер, то идем дальше
+if(Object.keys(users).length > 0) { // если есть хоть 1 юзер, то идем дальше
   wrapper_content.style.display = 'block';
-  // по идее active только один
   Object.keys(users).forEach(key => { if(users[key].active) init(users, users[key]) });
 } else { // если нет, то вставляем форму авторизации
   let login_input = document.querySelector('.login_input'),

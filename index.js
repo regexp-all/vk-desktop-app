@@ -52,9 +52,7 @@ var settings = {
 if(!fs.existsSync(SETTINGS_PATH)) fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
 else {
   let _settings = fs.readFileSync(SETTINGS_PATH, 'utf-8');
-  if(_settings == '' || _settings == '{}') {
-    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
-  } else if(!JSON.parse(_settings).audio){
+  if(_settings == '' || _settings == '{}' || !JSON.parse(_settings).audio) {
     fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
   } else settings = JSON.parse(_settings);
 }
@@ -72,14 +70,14 @@ app.on('ready', () => {
     show: false
   }
   
-  if(settings.window.x != undefined && settings.window.y != undefined) {
+  if(settings.window.x && settings.window.y) {
     winOpts.x = settings.window.x < 0 ? 0 : settings.window.x;
     winOpts.y = settings.window.y < 0 ? 0 : settings.window.y;
   }
   
   win = new BrowserWindow(winOpts);
   
-  win.setMenu(null);
+  win.setMenu(null); // удаление меню
   win.loadFile('renderer/index.html');
   win.on('ready-to-show', () => win.show());
   win.on('closed', () => win = null);

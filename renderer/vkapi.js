@@ -48,8 +48,7 @@ const { getCurrentWindow } = require('electron').remote;
 const utils = require('./utils');
 const USERS_PATH = utils.USERS_PATH;
 
-var toURL = obj => querystring.unescape(querystring.stringify(obj)),
-    toURLEncode = obj => querystring.stringify(obj),
+var toURL = obj => querystring.stringify(obj),
     md5 = data => require('crypto').createHash('md5').update(data).digest("hex"),
     online_methods = [
       'account.setOnline', 'account.setOffline',
@@ -62,14 +61,12 @@ var toURL = obj => querystring.unescape(querystring.stringify(obj)),
 
 var method = (method, params, callback) => {
   params   = params   || {};
-  callback = callback || (data => {});
+  callback = callback || (() => {});
   params.v = params.v || 5.74;
   
   let secret, id, users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf-8'));
   
-  Object.keys(users).forEach(user_id => {
-    if(users[user_id].active) id = user_id;
-  });
+  Object.keys(users).forEach(user_id => { if(users[user_id].active) id = user_id });
   
   if(!id && !params.secret) {
     getCurrentWindow().reload();
@@ -149,7 +146,7 @@ var auth = (authInfo, callback) => {
   
   https.get({
     host: 'oauth.vk.com',
-    path: `/token/?${toURLEncode(reqData)}`
+    path: `/token/?${toURL(reqData)}`
   }, res => {
     let data = '';
 

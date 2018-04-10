@@ -49,7 +49,6 @@ var audio = document.querySelector('.audio'),
     settings_json = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'));
     
 player_util_volume_this.style.width = settings_json.audio.volume * 100 + '%';
-
 danyadev.audio.audioLoaded = 0, danyadev.audio.this_track_id = 0;
 
 var load = (user, offset) => {
@@ -67,13 +66,21 @@ var load = (user, offset) => {
       let item = data.items[item_id];
       if(!item) return;
       
-      let cover, time = Math.floor(item.duration / 60) + ':', downloadClass;
+      let cover, downloadClass,
+          minutes = Math.floor(item.duration / 60),
+          hours = minutes >= 60 ? Math.floor(minutes / 60) + ':' : '',
+          secondsZero = (item.duration % 60) < 10 ? '0' : '',
+          seconds = ':' + secondsZero + item.duration % 60;
+      
+      if(hours != '') {
+        let minutesZero = (minutes - parseInt(hours) * 60) < 10 ? '0' : '';
+        minutes = minutesZero + (minutes - parseInt(hours) * 60);
+      }
+      
+      let time = hours + minutes + seconds;
       
       if(item.album && item.album.thumb) cover = item.album.thumb.photo_68;
       else cover = 'https://vk.com/images/audio_row_placeholder.png';
-      
-      if((item.duration % 60) < 10) time += '0' + item.duration % 60;
-      else time += item.duration % 60;
       
       if(fs.existsSync(danyadev.user.downloadPath + '\\' + item.artist + ' – ' + item.title + '.mp3'))
         downloadClass = 'audio_downloaded'
@@ -90,8 +97,9 @@ var load = (user, offset) => {
             <div class='audio_author'>${item.artist}</div>
           </div>
           <div class='audio_right_btns'>
-            <div class='${downloadClass}' title='Скачать аудиозапись' onclick='audio.downloadAudio(this)'
-                 data='["${item.artist}", "${item.title}", "${item.url}"]'></div>
+            <!--<div class='${downloadClass}' title='Скачать аудиозапись' onclick='audio.downloadAudio(this)'
+                 data='["${item.artist}", "${item.title}", "${item.url}"]'></div>-->
+            <div></div>
             <div class='audio_real_time' onclick='audio.toggleTime(this, event, "real")'>${time}</div>
             <div class='audio_played_time' onclick='audio.toggleTime(this, event, "played")'></div>
           </div>
@@ -99,7 +107,7 @@ var load = (user, offset) => {
       `.trim();
       
       item_id++;
-      if(item_id < data.items.length) setTimeout(renderAudioItem, 20);
+      if(item_id < data.items.length) setTimeout(renderAudioItem, 0);
       else getMoreSound(user, offset, data);
     }
     
@@ -125,6 +133,7 @@ var toggleAudio = (track, event) => {
     
   if(audio.src != track.attributes.src.value) { // если другой трек
     audio.src = track.attributes.src.value;
+    
     if(document.querySelector('.audio_cover_has_play'))
       document.querySelector('.audio_cover_has_play').classList.remove('audio_cover_has_play');
       
@@ -211,8 +220,10 @@ var getMoreSound = (user, offset, data) => {
   
   content.addEventListener('scroll', forListen);
   
-  if(!audio.audio_item) {
-    audio.audio_item = audiolist.children[0]; // первая песня в плейлисте
+  if(!audio.audio_item) { // при первой загрузке
+    audio.audio_item = audiolist.children[0];
+    audio.src = audio.audio_item.attributes.src.value;
+    audio.audio_item.children[0].children[1].classList.add('audio_cover_has_play');
     if(audio.audio_item.children[0].children[0].style.backgroundImage != 'url("https://vk.com/images/audio_row_placeholder.png")')
       player_cover.style.backgroundImage = audio.audio_item.children[0].children[0].style.backgroundImage;
     else player_cover.style.backgroundImage = 'url("images/empty_cover.svg")';
@@ -225,8 +236,10 @@ var getMoreSound = (user, offset, data) => {
   
   if(!danyadev.audio.audioLoaded && audiolist.clientHeight - window.outerHeight < window.scrollY) {
     forListen();
-    if(audiolist.clientHeight - window.outerHeight > window.scrollY) danyadev.audio.audioLoaded = 1;
-  } else if(!danyadev.audio.audioLoaded) danyadev.audio.audioLoaded = 1;
+  } else if(!danyadev.audio.audioLoaded) {
+    danyadev.audio.audioLoaded = 1;
+    // загружаем сюда всю музыку юзера для shuffle(tracklist);
+  }
 }
 
 var matchPlayedTime = () => {
@@ -275,7 +288,6 @@ player_next.addEventListener('click', () => {
   let audioTrack = audiolist.children[danyadev.audio.this_track_id + 1];
   
   if(!audioTrack) audioTrack = audiolist.children[0];
-  console.log(danyadev.audio.this_track_id);
   
   toggleAudio(audioTrack);
 });
@@ -295,7 +307,6 @@ audio.addEventListener('ended', () => { // переключение на сле�
   
   let audioItem = audiolist.children[danyadev.audio.this_track_id + 1];
   if(!audioItem) audioItem = audiolist.children[0];
-  console.log(danyadev.audio.this_track_id);
   
   setTimeout(() => toggleAudio(audioItem), 400);
 });
@@ -324,44 +335,95 @@ audio.addEventListener('timeupdate', () => { // сколько проигран�
 });
 
 // прокрутка трека
-player_progress_wrap.addEventListener('mousedown', () => danyadev.audio.seekstate = 1);
-
-player_progress_wrap.addEventListener('mousemove', e => {
-  if(e.buttons != 1) return;
+player_progress_wrap.addEventListener('mousedown', () => {
+  if(!audio.duration) return; // нет времени -> нет трека -> выходим отсюда
+  danyadev.audio.seekstate = 1;
+  player_progress_wrap.classList.add('player_progress_active');
   
-  let curTime = (e.offsetX * audio.duration) / player_progress_wrap.offsetWidth;
-  player_progress_played.style.width = (curTime / audio.duration) * 100 + '%';
-});
-
-player_progress_wrap.addEventListener('mouseup', e => {
-  danyadev.audio.seekstate = 0;
-  audio.currentTime = (e.offsetX * audio.duration) / player_progress_wrap.offsetWidth;
+  let mousemove = e => {
+    let offsetx = e.pageX - player_progress_wrap.offsetLeft,
+        curTime = offsetx / player_progress_wrap.offsetWidth, selWidth = curTime * 100;
+        
+    if(selWidth > 100) selWidth = 100;
+    if(selWidth < 0) selWidth = 0;
+    player_progress_played.style.width = selWidth + '%';
+  }
+  
+  let mouseup = e => {
+    danyadev.audio.seekstate = 0;
+    player_progress_wrap.classList.remove('player_progress_active');
+    
+    document.removeEventListener('mousemove', mousemove);
+    document.removeEventListener('mouseup', mouseup);
+    
+    let offsetx = e.pageX - player_progress_wrap.offsetLeft;
+    audio.currentTime = (offsetx * audio.duration) / player_progress_wrap.offsetWidth;
+  }
+  
+  document.addEventListener('mousemove', mousemove);
+  document.addEventListener('mouseup', mouseup);
 });
 
 // громкость
 player_volume_wrap.addEventListener('mousedown', e => {
-  audio.volume = (e.offsetX / player_volume_wrap.offsetWidth);
-  player_util_volume_this.style.width = audio.volume * 100 + '%'
-});
-
-player_volume_wrap.addEventListener('mousemove', e => {
-  if(e.buttons != 1) return;
+  player_volume_wrap.classList.add('player_volume_active');
   
-  audio.volume = (e.offsetX / player_volume_wrap.offsetWidth);
-  player_util_volume_this.style.width = audio.volume * 100 + '%'
+  let offsetx = e.pageX - player_volume_wrap.offsetLeft,
+      curTime = offsetx / player_volume_wrap.offsetWidth, selWidth = curTime * 100,
+      volume = offsetx / player_volume_wrap.offsetWidth;
+  
+  volume < 0 ? volume = 0 : '';
+  volume > 1 ? volume = 1 : '';
+  
+  if(selWidth > 100) selWidth = 100;
+  if(selWidth < 0) selWidth = 0;
+  
+  audio.volume = volume;
+  player_util_volume_this.style.width = selWidth + '%';
+  
+  let mousemove = e => {
+    if(e.buttons != 1) return;
+    
+    let volume = offsetx / player_volume_wrap.offsetWidth;
+        offsetx = e.pageX - player_volume_wrap.offsetLeft;
+        curTime = offsetx / player_volume_wrap.offsetWidth, selWidth = curTime * 100;
+    
+    volume < 0 ? volume = 0 : '';
+    volume > 1 ? volume = 1 : '';
+    
+    if(selWidth > 100) selWidth = 100;
+    if(selWidth < 0) selWidth = 0;
+    
+    audio.volume = volume;
+    player_util_volume_this.style.width = selWidth + '%'
+  }
+  
+  let mouseup = e => {
+    player_volume_wrap.classList.remove('player_volume_active');
+    
+    document.removeEventListener('mousemove', mousemove);
+    document.removeEventListener('mouseup', mouseup);
+  }
+  
+  document.addEventListener('mousemove', mousemove);
+  document.addEventListener('mouseup', mouseup);
 });
 
-/*
-И напоследок метод перемешивания списка:
-
-Playlist.prototype.shuffle = function(){
-	for(var j, x, i = this.list.length; i; j = Math.floor(Math.random() * i), x = this.list[--i], this.list[i] = this.list[j], this.list[j] = x);
+var shuffle = playlist => { // --i - уменьшение i, и пока он больше нуля,
+	for( // т.е. если не прошел по всему плейлисту, он продолжает идти
+    let j, x, i = playlist.length; i;
+    j = Math.floor(Math.random() * i), 
+    x = playlist[--i], 
+    playlist[i] = playlist[j], 
+    playlist[j] = x
+  );
 };
-*/
+
 
 module.exports = {
   init, load,
   toggleAudio,
   toggleTime,
-  downloadAudio
+  downloadAudio,
+  shuffle
 }
