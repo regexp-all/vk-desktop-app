@@ -50,17 +50,24 @@ var header = document.querySelector('.header'),
     open_devTools = document.querySelector('.open_devTools');
     
 var init = (users, user) => {
-  account_icon.style.backgroundImage = menu_account_bgc.style.backgroundImage = `url('${user.photo_100}')`;
-  full_name.innerHTML = `${user.first_name} ${user.last_name}`;
-  
+  // добавить user_ids, куда впихивать каждого юзера.
   vkapi.method('users.get', { fields: 'status,photo_100' }, data => {
-    acc_status.innerHTML = data.response[0].status;
     // проверять имена и фотки каждого юзера
+    user.first_name = data.response[0].first_name;
+    user.last_name = data.response[0].last_name;
+    user.photo_100 = data.response[0].photo_100;
+    
+    acc_status.innerHTML = data.response[0].status;
+    account_icon.style.backgroundImage = menu_account_bgc.style.backgroundImage = `url('${user.photo_100}')`;
+    full_name.innerHTML = `${user.first_name} ${user.last_name}`;
+    
+    danyadev.user = user;
+    menu_items.children[3].addEventListener('click', () => audio.load(user), { once: true });
+    require('./settings');
+    
+    users[user.id] = user;
+    fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
   });
-  
-  menu_items.children[3].addEventListener('click', () => audio.load(user), { once: true });
-  
-  require('./settings');
 }
 
 

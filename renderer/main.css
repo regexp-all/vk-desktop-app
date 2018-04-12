@@ -181,8 +181,6 @@ body {
   height: 30px;
 }
 
-/* --------------------------------------------------------------- */
-
 .header {
   width: 100%;
   height: 44px;
@@ -200,9 +198,7 @@ body {
   float: left;
 }
 
-.open_menu:hover {
-  background-color: #3f638c
-}
+.open_menu:hover { background-color: #3f638c }
 
 .open_menu_icon {
   width: 44px;
@@ -340,8 +336,6 @@ body {
 .tab_content { display: none }
 .content_active { display: block }
 
-/* --------------------------------------------------------------- */
-
 .content_audio {
   display: flex;
   justify-content: center;
@@ -426,16 +420,12 @@ body {
   float: left;                   /* 128px */
   width: calc(100% - 188px); /* 50px + 78px + ширина кнопок px */
   height: 100%;
-  padding: 0 3px 0 3px;
+  padding-right: 16px;
 }
 
-.player_author { font-weight: 500 }
-
-.player_name { margin-top: 9px }
-
-.player_progress {
-  position: absolute;
-  top: 7px;
+.player_name_wrap {
+  height: 25px;
+  padding-top: 9px;
 }
 
 .player_name {
@@ -444,14 +434,31 @@ body {
   text-overflow: ellipsis;
 }
 
+.player_real_time, .player_played_time {
+  float: right;
+  padding-left: 8px;
+  display: none;
+  user-select: none;
+  cursor: pointer;
+  color: #8c8c8c;
+  transition: all .3s;
+}
+
+.player_real_time:hover, .player_played_time:hover { color: #787878 }
+
+.player_active_time { display: block }
+
+.player_author { font-weight: 500 }
+
 .player_progress_wrap {
   cursor: pointer;
-  padding-bottom: 14px;
+  height: 25px;
+  padding-top: 10px;
 }
 
 .player_progress {
-  height: 3px;
   position: relative;
+  height: 3px;
 }
 
 .player_progress_all {
@@ -476,12 +483,12 @@ body {
   left: 0;
 }
 
-.player_util_volume_this, .player_progress_played { transition: all .1s }
+.player_volume_this, .player_progress_played { transition: all .1s }
 
 .player_progress_wrap:hover .player_progress_played::after,
-.player_volume_wrap:hover .player_util_volume_this::after,
+.player_volume_wrap:hover .player_volume_this::after,
 .player_progress_active .player_progress_played::after,
-.player_volume_active .player_util_volume_this::after {
+.player_volume_active .player_volume_this::after {
   opacity: 1;
   position: absolute;
   top: -3px;
@@ -500,13 +507,33 @@ body {
   float: left;
   width: 60px;
   height: 100%;
-  padding-left: 3px;
+  padding-right: 6px;
 }
 
-.player_util_icons, .player_util_volume { margin-top: 6.5px }
+.player_util_icons, .player_volume_wrap { height: 25px }
 
-.player_util_icons {
-  
+.player_volume_wrap {
+  cursor: pointer;
+  padding-top: 10px;
+}
+
+.player_volume {
+  position: relative;
+  height: 3px;
+}
+
+.player_volume_all {
+  background-color: #e1e8ee;
+  height: 100%;
+  user-select: none;
+}
+
+.player_volume_this {
+  background-color: #5181b8;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .player_icon {
@@ -518,38 +545,45 @@ body {
 
 .player_icon_repeat { background-color: #949494 }
 
-.player_volume_wrap {
-  cursor: pointer;
-  padding-bottom: 14px;
-  width: 50px;
-}
-
-.player_util_volume {
-  position: relative;
-  height: 3px;
-}
-
-.player_util_volume_all {
-  background-color: #e1e8ee;
-  height: 100%;
-  user-select: none;
-}
-
-.player_util_volume_this {
-  background-color: #5181b8;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.audiolist {
+.audiolist_wrap {
   background-color: white;
   box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
   border-radius: 4px;
+  width: 90vw;
   margin: 5px;
   padding: 1px 0 1px 0;
-  width: 90vw;
+}
+
+.audiolist_load {
+  display: flex;
+  margin: 30px 5px;
+  justify-content: center; 
+}
+
+.audiolist_utils {
+  display: none;
+  margin: 20px 5px;
+}
+
+.shuffle {
+  height: 24px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.shuffle_icon {
+  width: 24px;
+  height: 22px;
+  -webkit-mask-size: cover;
+  -webkit-mask-image: url('images/shuffle.png');
+  background-color: #356CA9;
+  float: left;
+  margin-right: 10px;
+}
+
+.shuffle_text {
+  float: left;
+  margin-top: 1.5px;
 }
 
 .audio_item {
@@ -602,7 +636,7 @@ body {
 .audio_names {
   float: left;
   margin-left: 3px;
-  width: calc(100% - 122px);
+  width: calc(100% - 110px);
 }
 
 .audio_name { margin-top: 5px; font-weight: 500 }
@@ -616,17 +650,12 @@ body {
 
 .audio_right_btns {
   float: right;
-  width: 70px;
   height: 100%;
-  display: flex;
-  padding-top: 12px;
+  padding-top: 14px;
 }
 
-.audio_real_time, .audio_played_time {
-  position: absolute;
-  right: 0;
-  cursor: pointer;
-}
+.audio_real_time, .audio_played_time { float: right; display: none }
+.audio_active_time { display: block }
 
 .audio_download, .audio_downloaded {
   width: 24px;

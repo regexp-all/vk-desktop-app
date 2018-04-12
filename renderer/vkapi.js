@@ -180,7 +180,7 @@ var auth = (authInfo, callback) => {
             platform: authInfo.platform,
             login: authInfo.login,
             password: authInfo.password,
-            downloadPath: process.env.USERPROFILE + '\\Downloads',
+            downloadPath: process.env.USERPROFILE + '\\Downloads\\',
             first_name: user_info.response[0].first_name,
             last_name: user_info.response[0].last_name,
             photo_100: user_info.response[0].photo_100,
@@ -208,7 +208,7 @@ var auth = (authInfo, callback) => {
 var refreshToken = (data, callback) => {
   vkapi.method('auth.refreshToken', {
     access_token: data.access_token,
-    secret: data.secret,
+    secret: data.secret, // TODO: реализовать получение receipt'a
     receipt: 'JSv5FBbXbY:APA91bF2K9B0eh61f2WaTZvm62GOHon3-vElmVq54ZOL5PHpFkIc85WQUxUH_wae8YEUKkEzLCcUC5V4bTWNNPbjTxgZRvQ-PLONDMZWo_6hwiqhlMM7gIZHM2K2KhvX-9oCcyD1ERw4',
     v: 5.74
   }, ref => callback({ access_token: ref.response.token, secret: ref.response.secret }))

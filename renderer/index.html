@@ -89,12 +89,20 @@
                 <audio class='audio'></audio>
                 <div class="player_cover"></div>
                 <div class="btns">
-                  <div class="player_button"><div class="player_back"></div></div>
-                  <div class="player_btn player_play"></div>
-                  <div class="player_button"><div class="player_next"></div></div>
+                  <div class="player_button" title='Предыдущая аудиозапись'>
+                    <div class="player_back"></div>
+                  </div>
+                  <div class="player_btn player_play" title='Воспроизвести'></div>
+                  <div class="player_button" title='Следующая аудиозапись'>
+                    <div class="player_next"></div>
+                  </div>
                 </div>
                 <div class="player_name_line">
-                  <div class="player_name">...</div>
+                  <div class="player_name_wrap">
+                    <div class="player_real_time player_active_time"></div>
+                    <div class="player_played_time">0:00</div>
+                    <div class="player_name"> </div>
+                  </div>
                   <div class="player_progress_wrap">
                     <div class="player_progress">
                       <div class="player_progress_all"></div>
@@ -105,18 +113,26 @@
                 </div>
                 <div class="player_utils">
                   <div class="player_util_icons">
-                    <div class="player_icon player_icon_repeat"></div>
+                    <!-- <div class="player_icon player_icon_repeat" title='Повторять'></div> -->
                   </div>
                   <div class="player_volume_wrap">
-                    <div class="player_util_volume">
-                      <div class="player_util_volume_all"></div>
-                      <div class="player_util_volume_this"></div>
+                    <div class="player_volume">
+                      <div class="player_volume_all"></div>
+                      <div class="player_volume_this"></div>
                     </div>
                   </div>
                 </div>
               </div>
-              
-              <div class="audiolist"></div>
+              <div class="audiolist_wrap">
+                <div class="audiolist_load">Загрузка аудиозаписей...</div>
+                <div class="audiolist_utils">
+                  <div class="shuffle">
+                    <div class="shuffle_icon"></div>
+                    <div class="shuffle_text">Перемешать аудиозаписи</div>
+                  </div>
+                </div>
+                <div class="audiolist"></div>
+              </div>
             </div>
           </div>
         </div>
