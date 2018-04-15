@@ -31,6 +31,7 @@ const audio = require('./audio');
 const captcha = require('./captcha');
 const settings = require('./settings');
 const utils = require('./utils');
+const update = require('./update')();
 const USERS_PATH = utils.USERS_PATH;
 const SETTINGS_PATH = utils.SETTINGS_PATH;
 const MENU_WIDTH = utils.MENU_WIDTH;
@@ -48,7 +49,7 @@ var header = document.querySelector('.header'),
     acc_status = document.querySelector('.menu_acc_status'),
     menu_account_bgc = document.querySelector('.menu_account_bgc'),
     open_devTools = document.querySelector('.open_devTools');
-    
+
 var init = (users, user) => {
   // добавить user_ids, куда впихивать каждого юзера.
   vkapi.method('users.get', { fields: 'status,photo_100' }, data => {
@@ -69,7 +70,6 @@ var init = (users, user) => {
     fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
   });
 }
-
 
 window.addEventListener('beforeunload', () => {
   let settings_json = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'));
