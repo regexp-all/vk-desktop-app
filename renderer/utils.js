@@ -43,7 +43,6 @@ module.exports = {
     [5027722, 'Skg1Tn1r2qEbbZIAJMx3'], // 5  VK Messenger
     [4580399, 'wYavpq94flrP3ERHO4qQ'], // 6  Snapster (Android)
     [2037484, 'gpfDXet2gdGTsvOs7MbL'], // 7  Symbian (Nokia)
-    [3265802, 't106ZcWMk9BLdrxobdh5'], // 8  API.console (из /dev)
     [3502557, 'PEObAuQi6KloPM4T30DV'], // 9  Windows Phone
     [3469984, 'kc8eckM3jrRj8mHWl9zQ'], // 10 Lynt
     [3032107, 'NOmHf1JNKONiIG5zPJUu']  // 11 Vika (Blackberry)

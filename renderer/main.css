@@ -549,20 +549,21 @@ body {
   background-color: white;
   box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
   border-radius: 4px;
+  min-width: 320px;
   width: 90vw;
   margin: 5px;
-  padding: 1px 0 1px 0;
+  padding: 1px 5px 1px 5px;
 }
 
 .audiolist_load {
   display: flex;
-  margin: 30px 5px;
+  margin: 30px 0;
   justify-content: center; 
 }
 
 .audiolist_utils {
   display: none;
-  margin: 20px 5px;
+  margin: 20px 0;
 }
 
 .shuffle {
@@ -587,15 +588,27 @@ body {
 }
 
 .audio_item {
-  min-width: 320px;
+  min-width: 310px;
   max-width: 90vw;
   height: 50px;
   position: relative;
-  margin: 5px;
   border-radius: 4px;
   transition: all .5s;
   user-select: none;
 }
+
+.audio_item_locked {
+  position: relative;
+  min-width: 310px;
+  max-width: 90vw;
+  height: 50px;
+  border-radius: 4px;
+  transition: all .5s;
+  opacity: 0.6;
+  user-select: none;
+}
+
+.audio_item_locked:hover { opacity: 0.8; }
 
 .audio_item:hover, .audio_item_active { background-color: #f2f4f7 }
 
@@ -654,7 +667,12 @@ body {
   padding-top: 14px;
 }
 
-.audio_real_time, .audio_played_time { float: right; display: none }
+.audio_real_time, .audio_played_time {
+  float: right;
+  display: none;
+  padding-right: 5px;
+}
+
 .audio_active_time { display: block }
 
 .audio_download, .audio_downloaded {

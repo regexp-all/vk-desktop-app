@@ -41,8 +41,7 @@ try {
 
 const { app, BrowserWindow } = require('electron');
 const fs = require('fs');
-const utils = require('./renderer/utils');
-const SETTINGS_PATH = utils.SETTINGS_PATH;
+const SETTINGS_PATH = __dirname + '\/renderer\/settings.json';
 
 var settings = {
   window: { width: 720, height: 480 },

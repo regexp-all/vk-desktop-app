@@ -50,7 +50,16 @@ var audio = document.querySelector('.audio'),
     player_volume_this = document.querySelector('.player_volume_this'),
     shuffle = document.querySelector('.shuffle'),
     settings_json = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'));
-    
+
+audio._play = audio.play;
+
+audio.play = () => audio._play().catch(err => {
+  if(err.message != "The play() request was interrupted by a new load request. https://goo.gl/LdLk22" &&
+     err.message != "The play() request was interrupted by a call to pause(). https://goo.gl/LdLk22") {
+    console.error(err);
+  }
+});
+
 player_volume_this.style.width = settings_json.audio.volume * 100 + '%';
 audio.volume = settings_json.audio.volume;
 
@@ -68,7 +77,7 @@ var load = () => {
   });
 }
 
-var render = () => {
+var render = cb => {
   let block = { innerHTML: '' }, id = danyadev.audio.renderedItems, endID = danyadev.audio.renderedItems + 15;
   
   let renderItem = () => {
@@ -88,9 +97,15 @@ var render = () => {
     if(item.album && item.album.thumb) cover = item.album.thumb.photo_68;
     else cover = 'https://vk.com/images/audio_row_placeholder.png';
     
+    let audio_block;
+    
+    if(item.url) {
+      audio_block = `<div class='audio_item' src='${item.url}' onclick='audio.toggleAudio(this, event)'>`;
+    } else audio_block = `<div class='audio_item_locked' title='Аудиозапись изъята из публичного доступа'>`;
+    
     // innerHTML тут для подсветки HTML в Atom'е
     block.innerHTML += `
-      <div class='audio_item' src='${item.url}' onclick='audio.toggleAudio(this, event)'>
+      ${audio_block}
         <div class='audio_covers'>
           <div class='audio_cover' style='background-image: url("${cover}")'></div>
           <div class='audio_cover_play'></div>
@@ -118,6 +133,11 @@ var render = () => {
       
       audiolist.innerHTML += block.innerHTML;
       
+      if(cb == 'play next') {
+        player_next.click();
+        danyadev.audio.blockNext = 0;
+      }
+      
       if((danyadev.audio.count <= 15 && danyadev.audio.renderedItems == danyadev.audio.count)
       || danyadev.audio.renderedItems <= 15) initPlayer();
       
@@ -138,6 +158,7 @@ shuffle.addEventListener('click', () => {
     document.querySelector('.player_pause').classList.add('player_play');
     document.querySelector('.player_pause').classList.remove('player_pause');
   }
+  
   audio.audio_item = undefined;
   audio.src = '';
   
@@ -152,23 +173,33 @@ shuffle.addEventListener('click', () => {
 });
 
 var initPlayer = () => {
-  audio.audio_item = audiolist.children[0];
-  audio.audio_item.children[0].children[1].classList.add('audio_cover_has_play');
-  audio.audio_item.classList.add('audio_item_active');
+  let firstItemId = 0;
   
-  audio.src = audio.audio_item.attributes.src.value;
-  toggleTime('played');
+  let checkLocked = () => {
+    if(audiolist.children[firstItemId].classList.contains('audio_item_locked')) {
+      firstItemId++;
+      checkLocked();
+    } else {
+      audio.audio_item = audiolist.children[firstItemId];
+      audio.audio_item.children[0].children[1].classList.add('audio_cover_has_play');
+      audio.audio_item.classList.add('audio_item_active');
+      
+      audio.src = audio.audio_item.attributes.src.value;
+      toggleTime('played');
+      
+      player_real_time.innerHTML = audio.audio_item.children[2].children[1].innerHTML;
+      
+      if(audio.audio_item.children[0].children[0].style.backgroundImage != 'url("https://vk.com/images/audio_row_placeholder.png")') {
+        player_cover.style.backgroundImage = audio.audio_item.children[0].children[0].style.backgroundImage;
+      } else player_cover.style.backgroundImage = 'url("images/empty_cover.svg")';
+      
+      player_name.innerHTML
+      = '<span class=\'player_author\'>' + audio.audio_item.children[1].children[1].innerHTML
+      + '</span> – ' + audio.audio_item.children[1].children[0].innerHTML;
+    }
+  }
   
-  player_real_time.innerHTML = audio.audio_item.children[2].children[1].innerHTML;
-  
-  if(audio.audio_item.children[0].children[0].style.backgroundImage != 'url("https://vk.com/images/audio_row_placeholder.png")') {
-    player_cover.style.backgroundImage = audio.audio_item.children[0].children[0].style.backgroundImage;
-  } else player_cover.style.backgroundImage = 'url("images/empty_cover.svg")';
-  
-  player_name.innerHTML = '<span class=\'player_author\'>'
-                        + audio.audio_item.children[1].children[1].innerHTML
-                        + '</span> – '
-                        + audio.audio_item.children[1].children[0].innerHTML;
+  checkLocked();
 }
 
 var renderNewItems = () => {
@@ -186,6 +217,19 @@ var loadSoundBlock = () => {
 
 var toggleAudio = (track, event) => {
   if(!track || (event && event.target != track.children[0].children[1])) return;
+
+  if(track.classList.contains('audio_item_locked')) {
+    if(danyadev.audio.play_prev) {
+      danyadev.audio.track_id--;
+      player_back.click();
+    } else {
+      danyadev.audio.track_id++;
+      player_next.click();
+    }
+    
+    return;
+  }
+  
   if(audio.src != track.attributes.src.value) toggleTime('real');
   
   audio.audio_item = track;
@@ -228,10 +272,9 @@ var toggleAudio = (track, event) => {
       player_cover.style.backgroundImage = track.children[0].children[0].style.backgroundImage;
     else player_cover.style.backgroundImage = 'url("images/empty_cover.svg")';
     
-    player_name.innerHTML = '<span class=\'player_author\'>'
-                          + audio.audio_item.children[1].children[1].innerHTML
-                          + '</span> – '
-                          + audio.audio_item.children[1].children[0].innerHTML;
+    player_name.innerHTML
+    = '<span class=\'player_author\'>' + audio.audio_item.children[1].children[1].innerHTML
+    + '</span> – ' + audio.audio_item.children[1].children[0].innerHTML;
   }
   
   if(audio.paused) {
@@ -299,23 +342,36 @@ player_played_time.addEventListener('click', () => toggleTime('real'));
 player_back.addEventListener('click', () => {
   let audioItem = audiolist.children[danyadev.audio.track_id - 1];
   
+  danyadev.audio.play_prev = 1;
+  
   if(!audioItem && !audio.paused) toggleAudio(audiolist.children[0]);
-  else if(!audioItem) return;
+  else if(!audioItem) {
+    danyadev.audio.play_prev = 0;
+    return;
+  }
   else toggleAudio(audioItem);
 });
 
 player_next.addEventListener('click', () => {
   let audioTrack = audiolist.children[danyadev.audio.track_id + 1];
   
-  if(!audioTrack) audioTrack = audiolist.children[0];
+  if(!audioTrack) {
+    if(danyadev.audio.renderedItems < danyadev.audio.count) {
+      if(danyadev.audio.blockNext) return;
+      
+      danyadev.audio.blockNext = 1;
+      render('play next');
+      return;
+    } else audioTrack = audiolist.children[0];
+  }
+  
+  danyadev.audio.play_prev = 0;
   
   toggleAudio(audioTrack);
 });
 
 player_btn.addEventListener('click', () => {
   let audioItem = audiolist.children[danyadev.audio.track_id];
-  
-  if(!audioItem) audioItem = audiolist.children[0];
   
   toggleAudio(audioItem);
 });
@@ -326,9 +382,18 @@ audio.addEventListener('ended', () => { // переключение на сле�
   audio.audio_item.classList.remove('audio_item_active');
   
   let audioItem = audiolist.children[danyadev.audio.track_id + 1];
-  if(!audioItem) audioItem = audiolist.children[0];
   
-  setTimeout(() => toggleAudio(audioItem), 400);
+  if(!audioItem) {
+    if(danyadev.audio.renderedItems < danyadev.audio.count) {
+      if(danyadev.audio.blockNext) return;
+      
+      danyadev.audio.blockNext = 1;
+      render('play next');
+      return;
+    } else audioItem = audiolist.children[0];
+  }
+  
+  setTimeout(() => toggleAudio(audioItem), 100);
 });
 
 content.addEventListener('scroll', () => {
