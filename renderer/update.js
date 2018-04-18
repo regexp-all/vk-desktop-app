@@ -1,5 +1,6 @@
 const https = require('https');
 const { dialog, app } = require('electron').remote;
+const develop = require('./utils').develop;
 
 var getGithubFiles = (user, repo, removeList, callback) => {
   let fileList = [], allFiles = [];
@@ -84,7 +85,7 @@ var update = () => {
       let v0 = JSON.parse(body).version.split('.'),
           v1 = JSON.parse(fs.readFileSync('./package.json')).version.split('.');
 
-      if(v0[0] > v1[0] || v0[1] > v1[1] || v0[2] > v1[2]) {
+      if(!develop && (v0[0] > v1[0] || v0[1] > v1[1] || v0[2] > v1[2])) {
         let noUpdate = ['/renderer/settings.json', '/renderer/users.json'];
         
         getGithubFiles('danyadev', 'vk-desktop-app', noUpdate, (files, allFiles) => {

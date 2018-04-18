@@ -23,17 +23,14 @@
 
 'use strict';
 
-const { Menu, getCurrentWindow } = require('electron').remote ? require('electron').remote : require('electron');
-
-var showContextMenu = template => {
-  Menu.buildFromTemplate(template).popup(getCurrentWindow());
-}
+const { Menu, getCurrentWindow } = require('electron').remote;
 
 module.exports = {
-  showContextMenu,
+  showContextMenu: t => Menu.buildFromTemplate(t).popup(getCurrentWindow()),
   USERS_PATH: __dirname + '\/users.json',
   SETTINGS_PATH: __dirname + '\/settings.json',
   MENU_WIDTH: '-260px',
+  develop: require('./../package.json').develop,
   keys: [
     [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 0  Android
     [3140623, 'VeWdmVclDCtn6ihuP1nt'], // 1  iPhone
