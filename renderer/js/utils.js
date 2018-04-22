@@ -1,36 +1,29 @@
 /* 
   Copyright © 2018 danyadev
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-*/
-
-/* Контактные данные:
+  Контактные данные:
    vk: https://vk.com/danyadev
    telegram: https://t.me/danyadev
-   email: nemov.danil@mail.ru
+   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 
 'use strict';
 
-const { Menu, getCurrentWindow } = require('electron').remote;
+const { Menu, getCurrentWindow } = require('electron').remote
 
 module.exports = {
   showContextMenu: t => Menu.buildFromTemplate(t).popup(getCurrentWindow()),
-  USERS_PATH: __dirname + '\/users.json',
-  SETTINGS_PATH: __dirname + '\/settings.json',
+  USERS_PATH: __dirname + '/../users.json',
+  SETTINGS_PATH: __dirname + '/../settings.json',
   MENU_WIDTH: '-260px',
-  develop: require('./../package.json').develop,
+  update: (() => {
+    let dev = require('./../../dev.json');
+    
+    if(!dev) return true;
+    
+    return dev.update;
+  })(),
   keys: [
     [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 0  Android
     [3140623, 'VeWdmVclDCtn6ihuP1nt'], // 1  iPhone

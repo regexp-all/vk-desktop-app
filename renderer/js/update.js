@@ -1,6 +1,33 @@
+/* 
+  Copyright © 2018 danyadev
+
+  Контактные данные:
+   vk: https://vk.com/danyadev
+   telegram: https://t.me/danyadev
+   альтернативная ссылка: https://t.elegram.ru/danyadev
+   github: https://github.com/danyadev/vk-desktop-app
+*/
+
+'use strict';
+
 const https = require('https');
 const { dialog, app } = require('electron').remote;
-const develop = require('./utils').develop;
+const utils = require('./utils');
+const path = require('path');
+const fs = require('fs');
+
+var mkdirP = p => {
+  p = path.resolve(p);
+
+  try {
+    fs.mkdirSync(p);
+  } catch(err) {
+    if(err.code == 'ENOENT') {
+      mkdirP(path.dirname(p));
+      mkdirP(p);
+    }
+  }
+};
 
 var getGithubFiles = (user, repo, removeList, callback) => {
   let fileList = [], allFiles = [];
@@ -81,17 +108,23 @@ var update = () => {
       let v0 = JSON.parse(body).version.split('.'),
           v1 = JSON.parse(fs.readFileSync('./package.json')).version.split('.');
 
-      if(!develop && (v0[0] > v1[0] || v0[1] > v1[1] || v0[2] > v1[2])) {
+      if(utils.update && (v0[0] > v1[0] || v0[1] > v1[1] || v0[2] > v1[2])) {
         let noUpdate = ['./renderer/settings.json', './renderer/users.json'];
         
         getGithubFiles('danyadev', 'vk-desktop-app', noUpdate, (files, allFiles) => {
           getLocalFiles(localFiles => {
             let deleteFiles = localFiles.filter(file => !allFiles.includes(file));
             
-            deleteFiles.forEach(file => fs.unlink(file, ()=>{}));
+            deleteFiles.forEach(file => fs.unlink(file, () => {}));
           });
           
           files.forEach((filename, i) => {
+            let match = filename.match(/[A-z]+\.?[A-z]+/g),
+                realFileName = match[match.length-1],
+                realPathToFile = filename.replace(realFileName, '');
+                
+            if(!fs.existsSync(filename)) mkdirP(realPathToFile);
+                
             let file = fs.createWriteStream(filename);
             
             https.get({

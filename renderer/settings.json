@@ -5,5 +5,8 @@
   },
   "audio": {
     "volume": 0.63
+  },
+  "settings": {
+    "theme": "white"
   }
 }

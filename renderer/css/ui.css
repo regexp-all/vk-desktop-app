@@ -1,0 +1,175 @@
+/* 
+  Copyright © 2018 danyadev
+
+  Контактные данные:
+   vk: https://vk.com/danyadev
+   telegram: https://t.me/danyadev
+   альтернативная ссылка: https://t.elegram.ru/danyadev
+   github: https://github.com/danyadev/vk-desktop-app
+*/
+
+.header {
+  width: 100%;
+  height: 44px;
+  background-color: #4a76a8;
+  float: right;
+  position: fixed;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 0 3px rgba(0,0,0,0.5);
+  transition: background-color .3s, box-shadow .3s;
+}
+
+.open_menu {
+  transition: all .3s;
+  width: 44px;
+  height: 44px;
+  float: left;
+  transition: background-color .3s;
+}
+
+.open_menu:hover { background-color: #3f638c }
+
+.open_menu_icon {
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  -webkit-mask-position: 0 -44px;
+  -webkit-mask-image: url('../images/m_vk_header.png');
+  transition: background-color .3s;
+}
+
+.menu {
+  width: 250px;
+  height: 100%;
+  top: 0;
+  overflow: auto;
+  display: inline-block;
+  position: fixed;
+  z-index: 11;
+  background-color: white;
+  transition: left .4s, background-color .3s;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  overflow-x: hidden;
+}
+
+.menu_account_item {
+  height: 125px;
+  width: 250px;
+  padding: 8px 10px 0 12px;
+  background-color: rgba(38, 37, 37, 0.5);
+  transition: all .3s;
+}
+
+.menu_account_bgc {
+  position: absolute;
+  width: 250px;
+  height: 125px;
+  top: -1px;
+  right: 1px;
+  z-index: -1;
+  background-repeat: no-repeat;
+  background-position: 0 -45px;
+  background-size: 100%;
+  filter: blur(4px);
+}
+
+.menu_multiacc {
+  width: 24px;
+  height: 22px;
+  position: absolute;
+  z-index: 100;
+  right: 10px;
+  background-color: white;
+  -webkit-mask-size: cover;
+  -webkit-mask-image: url('../images/menu_groups.png');
+  cursor: pointer;
+}
+
+.acc_icon {
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  background-size: 100%;
+  cursor: pointer;
+}
+
+.menu_acc_name {
+  margin-top: 12px;
+  font-weight: 480;
+  color: #f0f0f0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+.menu_acc_status {
+  font-size: 13px;
+  max-width: 240px;
+  color: #d4d4d4;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px }
+
+::-webkit-scrollbar-thumb {
+  border-radius: 25px;
+  background-color: rgba(143, 143, 143, 0.7);
+}
+
+.menu_item {
+  height: 44px;
+  padding-top: 10px;
+  padding-right: 50px;
+  transition: background-color .3s;
+  cursor: pointer;
+  background-color: white;
+}
+
+.menu_item_active { transition: background-color .3s }
+
+.menu_item:hover, .menu_item_active:not(.menu_account_item) { background-color: #ebeced }
+
+.menu_icon {
+  width: 24px;
+  height: 22px;
+  margin-left: 10px;
+  background-color: #a6a6a6;
+  -webkit-mask-size: cover;
+}
+
+.menu_news_icon     { -webkit-mask-image: url('../images/menu_news.png')          }
+.menu_mess_icon     { -webkit-mask-image: url('../images/menu_messages.png')      }
+.menu_music_icon    { -webkit-mask-image: url('../images/menu_music.png')         }
+.menu_notify_icon   { -webkit-mask-image: url('../images/menu_notifications.png') }
+.menu_friends_icon  { -webkit-mask-image: url('../images/menu_friends.png')       }
+.menu_groups_icon   { -webkit-mask-image: url('../images/menu_groups.png')        }
+.menu_photos_icon   { -webkit-mask-image: url('../images/menu_photos.png')        }
+.menu_videos_icon   { -webkit-mask-image: url('../images/menu_videos.png')        }
+.menu_settings_icon { -webkit-mask-image: url('../images/menu_settings.png')      }
+
+.menu_icon, .menu_item_name { float: left }
+
+.menu_item_name {
+  margin: 1px 0 0 10px;
+  user-select: none;
+  transition: color .3s;
+}
+
+.content {
+  margin-top: 44px;
+  transition: background-color .3s, color .3s;
+  height: calc(100vh - 44px);
+  overflow: auto;
+  background: #f2f2f2;
+}
+
+.tab_content { display: none }
+.content_active {
+  display: block;
+  height: 100%;
+}

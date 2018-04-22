@@ -1,23 +1,10 @@
 /* 
   Copyright © 2018 danyadev
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-*/
-
-/* Контактные данные:
+  Контактные данные:
    vk: https://vk.com/danyadev
    telegram: https://t.me/danyadev
-   email: nemov.danil@mail.ru
+   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 
@@ -29,7 +16,25 @@ const USERS_PATH = utils.USERS_PATH;
 const MENU_WIDTH = utils.MENU_WIDTH;
 const keys = utils.keys;
 
-var settings_item = document.querySelector('.settings_item');
+var settings_item = qs('.settings_item'),
+    settings_tabs = qs('.settings_tabs'),
+    settings_content_block = qs('.settings_content_block');
+    
+settings_tabs.children[0].classList.add('settings_tab_active');
+settings_content_block.children[0].classList.add('settings_content_active');
+
+[].slice.call(settings_tabs.children).forEach(item => {
+  item.addEventListener('click', function() {
+    if(qs('.settings_tab_active') == this) return;
+    let tab = [].slice.call(settings_tabs.children).indexOf(this);
+
+    qs('.settings_tab_active').classList.remove('settings_tab_active');
+    qs('.settings_content_active').classList.remove('settings_content_active');
+
+    settings_tabs.children[tab].classList.add('settings_tab_active');
+    settings_content_block.children[tab].classList.add('settings_content_active');
+  });
+});
 
 settings_item.addEventListener('contextmenu', () => {
   require('./utils.js').showContextMenu([
@@ -64,8 +69,7 @@ var editOnline = data => {
     client_secret: null, // секрет выбранного приложения keys[authInfo.platform[0]][1],
     '2fa_supported': true,
     scope: 'nohttps,all',
-    force_sms: true,
-    v: 5.73
+    force_sms: true
   }, data => {
     // туто применение/включение капчи/ввода кода из смс
   });

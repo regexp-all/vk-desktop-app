@@ -1,23 +1,10 @@
 /* 
   Copyright © 2018 danyadev
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-*/
-
-/* Контактные данные:
+  Контактные данные:
    vk: https://vk.com/danyadev
    telegram: https://t.me/danyadev
-   email: nemov.danil@mail.ru
+   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 
@@ -41,6 +28,18 @@ UFT_PHOTO_WALL:         ['photo', 'photos.getWallUploadServer', 'photos.saveWall
 UFT_VIDEO:              ['video_file', 'video.save']
 */
 
+/*
+  function post(message) {
+    vkapi.method('wall.post', {
+      from_group: 1,
+      signed: 1,
+      message: message,
+      owner_id: 88262293,
+      publish_date: parseInt(new Date().getTime()/1000) + 60
+    });
+  }
+*/
+
 const https = require('https');
 const fs = require('fs');
 const querystring = require('querystring');
@@ -48,7 +47,7 @@ const { getCurrentWindow } = require('electron').remote;
 const utils = require('./utils');
 const USERS_PATH = utils.USERS_PATH;
 
-var toURL = obj => querystring.stringify(obj),
+var toURL = obj => decodeURIComponent(querystring.stringify(obj)),
     md5 = data => require('crypto').createHash('md5').update(data).digest("hex"),
     online_methods = [
       'account.setOnline', 'account.setOffline',
