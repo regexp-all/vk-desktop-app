@@ -18,11 +18,11 @@ module.exports = {
   SETTINGS_PATH: __dirname + '/../settings.json',
   MENU_WIDTH: '-260px',
   update: (() => {
-    let dev = require('./../../dev.json');
-    
-    if(!dev) return true;
-    
-    return dev.update;
+    try {
+      return require('./../../dev.json').update;
+    } catch(e) {
+      return true;
+    }
   })(),
   keys: [
     [2274003, 'hHbZxrka2uZ6jB1inYsH'], // 0  Android

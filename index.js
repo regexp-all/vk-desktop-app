@@ -26,9 +26,9 @@ try {
 
 const { app, BrowserWindow } = require('electron');
 const fs = require('fs');
-const SETTINGS_PATH = __dirname + '\/renderer\/settings.json';
+const SETTINGS_PATH = __dirname + '/renderer/settings.json';
 
-var settings = fs.readFileSync(SETTINGS_PATH, 'utf-8');
+var settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'));
 
 app.on('window-all-closed', () => {
   if(process.platform != 'darwin') app.quit();
