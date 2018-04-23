@@ -47,7 +47,20 @@ const { getCurrentWindow } = require('electron').remote;
 const utils = require('./utils');
 const USERS_PATH = utils.USERS_PATH;
 
-var toURL = obj => decodeURIComponent(querystring.stringify(obj)),
+var toURL = obj => {
+      let s = [],
+          add = (k, v) => s[s.length] = `${k}=${v}`,
+          buildParams = (p, o) => {
+            let k;
+            
+            if(p) add(p, o);
+            else for(k in o) buildParams(k, o[k]);
+            
+            return s;
+          };
+
+      return buildParams('', obj).join('&');
+    },
     md5 = data => require('crypto').createHash('md5').update(data).digest("hex"),
     online_methods = [
       'account.setOnline', 'account.setOffline',
@@ -162,7 +175,7 @@ var auth = (authInfo, callback) => {
         return;
       }
       
-      vkapi.method('users.get', {
+      method('users.get', {
         access_token: data.access_token,
         user_id: data.user_id,
         secret: data.secret,
@@ -205,7 +218,7 @@ var auth = (authInfo, callback) => {
 };
 
 var refreshToken = (data, callback) => {
-  vkapi.method('auth.refreshToken', {
+  method('auth.refreshToken', {
     access_token: data.access_token,
     secret: data.secret, // TODO: реализовать получение receipt'a
     receipt: 'JSv5FBbXbY:APA91bF2K9B0eh61f2WaTZvm62GOHon3-vElmVq54ZOL5PHpFkIc85WQUxUH_wae8YEUKkEzLCcUC5V4bTWNNPbjTxgZRvQ-PLONDMZWo_6hwiqhlMM7gIZHM2K2KhvX-9oCcyD1ERw4',

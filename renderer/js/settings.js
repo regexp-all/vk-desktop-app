@@ -11,9 +11,6 @@
 'use strict';
 
 const vkapi = require('./vkapi');
-const utils = require('./utils');
-const USERS_PATH = utils.USERS_PATH;
-const MENU_WIDTH = utils.MENU_WIDTH;
 const keys = utils.keys;
 
 var settings_item = qs('.settings_item'),

@@ -21,7 +21,6 @@ const SETTINGS_PATH = utils.SETTINGS_PATH;
 const MENU_WIDTH = utils.MENU_WIDTH;
 const theme = require('./js/theme'); theme();
 const update = require('./js/update'); update();
-const captcha = require('./js/captcha');
 
 var header = qs('.header'),
     content = qs('.content'),

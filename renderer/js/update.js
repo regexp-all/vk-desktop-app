@@ -12,9 +12,7 @@
 
 const https = require('https');
 const { dialog, app } = require('electron').remote;
-const utils = require('./utils');
 const path = require('path');
-const fs = require('fs');
 
 var mkdirP = p => {
   p = path.resolve(p);
@@ -105,10 +103,13 @@ var update = () => {
 
     res.on('data', ch => body += ch);
     res.on('end', () => {
-      let v0 = JSON.parse(body).version.split('.'),
-          v1 = JSON.parse(fs.readFileSync('./package.json')).version.split('.');
+      let loc_package = require(__dirname + '/../../package.json'),
+          ext_package = JSON.parse(body),
+          v0 = ext_package.version.split('.'),
+          v1 = loc_package.version.split('.'),
+          newBuild = ext_package.build > loc_package.build;
 
-      if(utils.update && (v0[0] > v1[0] || v0[1] > v1[1] || v0[2] > v1[2])) {
+      if(utils.update && (v0[0] > v1[0] || v0[1] > v1[1] || v0[2] > v1[2] || newBuild)) {
         let noUpdate = ['./renderer/settings.json', './renderer/users.json'];
         
         getGithubFiles('danyadev', 'vk-desktop-app', noUpdate, (files, allFiles) => {

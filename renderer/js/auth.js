@@ -10,6 +10,9 @@
 
 'use strict';
 
+const vkapi = require('./vkapi');
+const captcha = require('./js/captcha');
+
 var login_input = qs('.login_input'),
     password_input = qs('.password_input input'),
     show_password = qs('.show_password'),

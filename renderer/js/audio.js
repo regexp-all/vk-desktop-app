@@ -11,7 +11,6 @@
 'use strict';
 
 const { BrowserWindow } = require('electron').remote;
-const fs = require('fs');
 const https = require('https');
 const vkapi = require('./vkapi');
 
@@ -248,8 +247,9 @@ var toggleAudio = (track, event) => {
     audio.src = track.attributes.src.value;
     toggleTime('played');
     
-    if(qs('.audio_cover_has_play'))
+    if(qs('.audio_cover_has_play')) {
       qs('.audio_cover_has_play').classList.remove('audio_cover_has_play');
+    }
       
     cover_util.classList.add('audio_cover_has_play');
     
@@ -421,7 +421,7 @@ audio.addEventListener('timeupdate', () => { // сколько проигран�
 });
 
 // прокрутка трека
-player_progress_wrap.addEventListener('mousedown', () => {
+player_progress_wrap.addEventListener('mousedown', ev => {
   if(!audio.duration) return; // нет времени -> нет трека -> выходим отсюда
   
   danyadev.audio.seekstate = 1;
@@ -453,6 +453,8 @@ player_progress_wrap.addEventListener('mousedown', () => {
   
   document.addEventListener('mousemove', mousemove);
   document.addEventListener('mouseup', mouseup);
+  
+  ev.preventDefault();
 });
 
 // громкость
@@ -494,6 +496,8 @@ player_volume_wrap.addEventListener('mousedown', ev => {
   
   document.addEventListener('mousemove', mousemove);
   document.addEventListener('mouseup', mouseup);
+  
+  ev.preventDefault();
 });
 
 var arrayShuffle = arr => {
