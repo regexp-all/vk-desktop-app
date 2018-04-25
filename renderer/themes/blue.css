@@ -8,43 +8,75 @@
    github: https://github.com/danyadev/vk-desktop-app
 */
 
-.theme_block {
+/* стили для блоков и шапки */
+.blue_theme .theme_block {
   background-color: #222E3C;
-  box-shadow: 0 1px 0 0 #1c2633, 0 0 0 1px #1c2633;
+  box-shadow: 0 0 0 1px #19222e;
 }
 
-.theme_bgc {
+/* стили для фона */
+.blue_theme .theme_bgc {
   background-color: #151E27;
   color: #c2c2c2;
 }
 
-.settings_tab:hover, .settings_tab_active {
+/* стили для меню */
+.blue_theme .theme_menu {
+  background-color: #151E27;
+  color: #c2c2c2;
+}
+
+/* стили для выделенных в меню элементов */
+.blue_theme .menu_item:hover,
+.blue_theme .menu_item_active:not(.menu_account_item),
+.blue_theme .option.active {
+  background-color: #1d2936;
+}
+
+.blue_theme .select,
+.blue_theme .select_list {
+  box-shadow: 0 0 0 1px #19222e;
+}
+
+.blue_theme .select_list {
+ background-color: #151E27;
+}
+
+/* стили для выделенных в настройках в меню элементов */
+.blue_theme .settings_tab:hover,
+.blue_theme .settings_tab_active {
   background-color: #2c3b4d;
 }
 
-.open_menu:hover { background-color: #313944 }
-.open_menu_icon { background-color: #bbbbbb }
+/* стили для кнопки открытия меню при наведении */
+.blue_theme .open_menu:hover { background-color: #2a394a }
 
-.menu_item:hover, .menu_item_active:not(.menu_account_item) {
-  background-color: #313944;
-}
+/* и для самой иконки */
+.blue_theme .open_menu_icon { background-color: #bbbbbb }
 
-.player_cover { background-color: #1c2633 }
+/* стили для пустого кавера в плеере */
+.blue_theme .player_cover { background-color: #2e3e52 }
 
-.player_progress_all { background-color: #4a4a4a }
-.player_progress_loaded { background-color: #616161 }
-.player_progress_played { background-color: #8f8f8f }
+/* стили для полоски перемотки трека */
+.blue_theme .player_progress_all { background-color: #4a4a4a }
+.blue_theme .player_progress_loaded { background-color: #616161 }
+.blue_theme .player_progress_played { background-color: #8f8f8f }
 
-.player_progress_wrap:hover .player_progress_played::after,
-.player_volume_wrap:hover .player_volume_this::after,
-.player_progress_active .player_progress_played::after,
-.player_volume_active .player_volume_this::after {
+/* стили для полоски изменения громкости */
+.blue_theme .player_volume_all { background-color: #4a4a4a }
+.blue_theme .player_volume_this { background-color: #8f8f8f }
+
+/* стили для точки у перемотки трека и громкости */
+.blue_theme .player_progress_wrap:hover .player_progress_played::after,
+.blue_theme .player_volume_wrap:hover .player_volume_this::after,
+.blue_theme .player_progress_active .player_progress_played::after,
+.blue_theme .player_volume_active .player_volume_this::after {
   background-color: #8f8f8f;
 }
 
-.player_volume_all { background-color: #4a4a4a }
-.player_volume_this { background-color: #8f8f8f }
-
-.audio_item:hover, .audio_item_active {
-  background-color: #2c3b4d;
+/* стили для выделенной аудиозаписи */
+.blue_theme .audio_item:hover,
+.blue_theme .audio_item_active,
+.blue_theme .option.active {
+  background-color: #2a394a;
 }

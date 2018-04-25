@@ -11,8 +11,8 @@
 'use strict';
 
 const https = require('https');
-const { dialog, app } = require('electron').remote;
 const path = require('path');
+const { dialog, app } = require('electron').remote;
 
 var mkdirP = p => {
   p = path.resolve(p);
@@ -80,9 +80,18 @@ var getLocalFiles = callback => {
       for(let i = 0; i < files.length; i++) {
         if(files[i] == '.git' || files[i] == 'core') continue;
         
-        let file = path ? path + '/' + files[i] : files[i];
+        let file = path ? path + '/' + files[i] : files[i],
+            isDIR = 0;
+            
+        try {
+          isDIR = fs.statSync(slash + file).isDirectory()
+        } catch(e) {
+          if(e.code == 'ENOENT') return;
+          
+          throw e;
+        }
         
-        if(fs.statSync(slash + file).isDirectory()) {
+        if(isDIR) {
           readDir(slash + file);
           dir = 1;
         } else {
@@ -125,31 +134,34 @@ var update = () => {
                 realPathToFile = filename.replace(realFileName, '');
                 
             if(!fs.existsSync(filename)) mkdirP(realPathToFile);
-                
-            let file = fs.createWriteStream(filename);
             
             https.get({
               host: 'raw.githubusercontent.com',
               path: `/danyadev/vk-desktop-app/master/${filename}`
             }, res => {
-              res.pipe(file);
-              // если делать полоску - то тут можно делать loaded++ и прибавлять проценты
+              let body = Buffer.alloc(0);
               
-              if(i == files.length - 1) {
-                dialog.showMessageBox({
-                  type: 'info',
-                  buttons: ['ОК', 'Отмена'],
-                  title: 'Доступно обновление',
-                  message: 'Доступно новое обновление.',
-                  detail: 'Для обновления необходимо перезагрузить приложение.\nПродолжить?',
-                  noLink: true
-                }, btn => {
-                  if(!btn) {
-                    app.relaunch();
-                    app.exit();
+              res.on('data', ch => body = Buffer.concat([body, ch]));
+              res.on('end', () => {
+                fs.writeFile(filename, body, () => {
+                  // если делать полоску - то тут можно делать loaded++ и прибавлять проценты
+                  if(i == files.length - 1) {
+                    dialog.showMessageBox({
+                      type: 'info',
+                      buttons: ['ОК', 'Отмена'],
+                      title: 'Доступно обновление',
+                      message: 'Доступно новое обновление.',
+                      detail: 'Для обновления необходимо перезагрузить приложение.\nПродолжить?',
+                      noLink: true
+                    }, btn => {
+                      if(!btn) {
+                        app.relaunch();
+                        app.exit();
+                      }
+                    });
                   }
                 });
-              }
+              });
             });
           });
         });

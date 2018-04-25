@@ -1,3 +1,15 @@
+/* 
+  Copyright © 2018 danyadev
+
+  Контактные данные:
+   vk: https://vk.com/danyadev
+   telegram: https://t.me/danyadev
+   альтернативная ссылка: https://t.elegram.ru/danyadev
+   github: https://github.com/danyadev/vk-desktop-app
+*/
+
+'use strict';
+
 const vkapi = require('./vkapi');
 const audio = require('./audio');
 
@@ -39,8 +51,11 @@ var init = (users, user) => {
     danyadev.user = user;
     
     // далее идет инициализация всех разделов. Сначала нужно инициализировать выбранный активный раздел.
-    
-    menu.children[3].addEventListener('click', () => audio.load(user), { once: true });
+    // автоматизировать нахождение дефолтного таба и require нужного раздела
+    if(settings_json.settings.def_tab == 3) audio.load(user);
+    else {
+      menu.children[3].addEventListener('click', () => audio.load(user), { once: true });
+    }
     
     require('./settings');
     

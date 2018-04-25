@@ -21,6 +21,7 @@ const SETTINGS_PATH = utils.SETTINGS_PATH;
 const MENU_WIDTH = utils.MENU_WIDTH;
 const theme = require('./js/theme'); theme();
 const update = require('./js/update'); update();
+const settings_json = require('./settings.json');
 
 var header = qs('.header'),
     content = qs('.content'),
@@ -33,16 +34,16 @@ var header = qs('.header'),
 var init = (users, user) => require('./js/init')(users, user);
 
 window.addEventListener('beforeunload', () => {
-  let settings_json = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'));
+  let settings_json_new = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'));
   
-  settings_json.window = getCurrentWindow().getBounds();
-  settings_json.audio.volume = qs('.audio').volume;
+  settings_json_new.window = getCurrentWindow().getBounds();
+  settings_json_new.audio.volume = qs('.audio').volume;
   
-  fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings_json, null, 2));
+  fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings_json_new, null, 2));
 });
 
-menu.children[0].classList.add('menu_item_active');
-content.children[0].classList.add('content_active');
+menu.children[settings_json.settings.def_tab].classList.add('menu_item_active');
+content.children[settings_json.settings.def_tab].classList.add('content_active');
 
 [].slice.call(menu.children).forEach(item => {
   item.addEventListener('click', function() {

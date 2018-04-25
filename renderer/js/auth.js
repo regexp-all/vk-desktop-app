@@ -11,7 +11,7 @@
 'use strict';
 
 const vkapi = require('./vkapi');
-const captcha = require('./js/captcha');
+const captcha = require('./captcha');
 
 var login_input = qs('.login_input'),
     password_input = qs('.password_input input'),
@@ -50,12 +50,14 @@ sms_code.onkeydown = e => {
 }
 
 login_input.oninput = password_input.oninput = () => {
-  if(login_input.value.trim()    != '' &&
-     password_input.value.trim() != '' &&
-     login_button.disabled) login_button.disabled = false;
+  if(login_input.value.trim()   != '' &&
+    password_input.value.trim() != '' && login_button.disabled) {
+    login_button.disabled = false;
+  }
   
-  if(login_input.value.trim() == '' || password_input.value.trim() == '')
+  if(login_input.value.trim() == '' || password_input.value.trim() == '') {
     login_button.disabled = true;
+  }
 }
 
 login_button.addEventListener('click', () => {
@@ -75,11 +77,13 @@ var auth = mainAuth => {
     login_button.disabled = false;
     
     if(data.error) {
-      if(data.error == 'need_captcha') 
+      if(data.error == 'need_captcha') {
         captcha(data.captcha_img, data.captcha_sid, (key, sid) => auth({key, sid}));
+      }
       
-      if(data.error_description == 'Username or password is incorrect')
+      if(data.error_description == 'Username or password is incorrect') {
         error_info.innerHTML = 'Неверный логин или пароль';
+      }
       
       if(data.error == 'need_validation') {
         sms_code.style.display = 'block';
@@ -89,13 +93,16 @@ var auth = mainAuth => {
         twofa_info.innerHTML = `Смс придет на номер ${data.phone_mask}`;
       }
       
-      if(data.error_description == 'code is invalid') error_info.innerHTML = 'Неверный код';
+      if(data.error_description == 'code is invalid') {
+        error_info.innerHTML = 'Неверный код';
+      }
       
       return;
     }
     
     error_info.innerHTML = '';
     twofa_info.innerHTML = '';
+    
     wrapper_login.style.display = 'none';
     wrapper_content.style.display = 'block';
     

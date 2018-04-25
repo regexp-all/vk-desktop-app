@@ -7,6 +7,7 @@
     "volume": 0.63
   },
   "settings": {
-    "theme": "white"
+    "theme": "white",
+    "def_tab": 0
   }
 }

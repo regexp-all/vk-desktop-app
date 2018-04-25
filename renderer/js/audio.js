@@ -88,7 +88,8 @@ var render = cb => {
     let audio_block;
     
     if(item.url) {
-      audio_block = `<div class='audio_item' src='${item.url}' onclick='require("./js/audio").toggleAudio(this, event)'>`;
+      audio_block = `<div class='audio_item' src='${item.url}' `
+                  + `onclick='require("./js/audio").toggleAudio(this, event)'>`;
     } else audio_block = `<div class='audio_item_locked' title='Аудиозапись изъята из публичного доступа'>`;
     
     // innerHTML тут для подсветки HTML синтаксиса в Atom'е
@@ -117,6 +118,8 @@ var render = cb => {
       setTimeout(renderItem, 0);
     } else {
       if(id == 15) { // когда загрузился первый блок
+        audiolist.innerHTML = '';
+        
         audiolist_load.style.display = 'none';
         audiolist_utils.style.display = 'block';
       }
@@ -128,7 +131,8 @@ var render = cb => {
         danyadev.audio.blockNext = 0;
       }
       
-      if((danyadev.audio.count <= 15 && danyadev.audio.renderedItems == danyadev.audio.count)
+      if((danyadev.audio.count <= 15
+      && danyadev.audio.renderedItems == danyadev.audio.count)
       || danyadev.audio.renderedItems <= 15) initPlayer();
       
       if(danyadev.audio.renderedItems < danyadev.audio.count) loadSoundBlock();
@@ -139,6 +143,9 @@ var render = cb => {
 }
 
 shuffle.addEventListener('click', () => {
+  if(danyadev.audio.renderedItems % 15 != 0
+    && danyadev.audio.renderedItems != danyadev.audio.count) return;
+  
   danyadev.audio.track_id = 0;
   danyadev.audio.renderedItems = 0;
   
@@ -151,8 +158,6 @@ shuffle.addEventListener('click', () => {
   
   audio.audio_item = undefined;
   audio.src = '';
-  
-  audiolist.innerHTML = '';
   
   player_progress_loaded.style.width = '';
   player_progress_played.style.width = '';
@@ -179,13 +184,15 @@ var initPlayer = () => {
       
       player_real_time.innerHTML = audio.audio_item.children[2].children[1].innerHTML;
       
-      if(audio.audio_item.children[0].children[0].style.backgroundImage != 'url("https://vk.com/images/audio_row_placeholder.png")') {
-        player_cover.style.backgroundImage = audio.audio_item.children[0].children[0].style.backgroundImage;
+      let bgi = audio.audio_item.children[0].children[0].style.backgroundImage;
+      
+      if(bgi != 'url("https://vk.com/images/audio_row_placeholder.png")') {
+        player_cover.style.backgroundImage = bgi;
       } else player_cover.style.backgroundImage = 'url("images/empty_cover.svg")';
       
-      player_name.innerHTML
-      = '<span class=\'player_author\'>' + audio.audio_item.children[1].children[1].innerHTML
-      + '</span> – ' + audio.audio_item.children[1].children[0].innerHTML;
+      player_name.innerHTML = '<span class=\'player_author\'>'
+      + audio.audio_item.children[1].children[1].innerHTML + '</span> – '
+      + audio.audio_item.children[1].children[0].innerHTML;
     }
   }
   
@@ -195,7 +202,7 @@ var initPlayer = () => {
 var renderNewItems = () => {
   let h = window.screen.height > audiolist.clientHeight;
   
-  if(h || audiolist.clientHeight && audiolist.clientHeight - window.outerHeight - 50 < content.scrollTop) {
+  if(h || audiolist.clientHeight && audiolist.clientHeight - window.outerHeight < content.scrollTop) {
     content.removeEventListener('scroll', renderNewItems);
     render();
   }
@@ -265,12 +272,13 @@ var toggleAudio = (track, event) => {
     
     let bgi = track.children[0].children[0].style.backgroundImage;
     
-    if(bgi != 'url("https://vk.com/images/audio_row_placeholder.png")') player_cover.style.backgroundImage = bgi;
-    else player_cover.style.backgroundImage = 'url("images/empty_cover.svg")';
+    if(bgi != 'url("https://vk.com/images/audio_row_placeholder.png")') {
+      player_cover.style.backgroundImage = bgi;
+    } else player_cover.style.backgroundImage = 'url("images/empty_cover.svg")';
     
-    player_name.innerHTML
-    = '<span class=\'player_author\'>' + audio.audio_item.children[1].children[1].innerHTML
-    + '</span> – ' + audio.audio_item.children[1].children[0].innerHTML;
+    player_name.innerHTML = '<span class=\'player_author\'>'
+    + audio.audio_item.children[1].children[1].innerHTML + '</span> – '
+    + audio.audio_item.children[1].children[0].innerHTML;
   }
   
   if(audio.paused) {
@@ -310,6 +318,7 @@ var matchPlayedTime = () => {
 
   if(hours != '') {
     let minutesZero = (minutes - parseInt(hours) * 60) < 10 ? '0' : '';
+    
     minutes = minutesZero + (minutes - parseInt(hours) * 60);
   }
   
@@ -398,10 +407,12 @@ content.addEventListener('scroll', () => {
   if(content.scrollTop >= 56) { // 100 - 44, где 44 - высота шапки
     audioplayer.style.position = 'fixed';
     audioplayer.style.marginTop = '44px';
+    
     qs('.pl50').style.display = 'block';
   } else {
     audioplayer.style.position = '';
     audioplayer.style.marginTop = '';
+    
     qs('.pl50').style.display = 'none';
   }
 });
@@ -504,9 +515,9 @@ var arrayShuffle = arr => {
 	for(
     let j, x, i = arr.length; i;
     j = Math.floor(Math.random() * i), 
-    x = playlist[--i], 
-    playlist[i] = playlist[j], 
-    playlist[j] = x
+    x = arr[--i], 
+    arr[i] = arr[j], 
+    arr[j] = x
   );
 };
 

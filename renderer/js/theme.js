@@ -10,22 +10,25 @@
 
 'use strict';
 
-var link = document.createElement('link'),
-    settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8')).settings;
-
-link.rel = 'stylesheet';
-link.href = `themes/${settings.theme}.css`;
-link.className = 'black-style-link';
+var settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8')).settings;
 
 module.exports = type => {
+  let attrs = [].slice.call(qs('body').classList);
+  
   if((type && type == 'white') || (!type && settings.theme == 'white')) {
-    if(qs('.black-style-link')) document.head.removeChild(qs('.black-style-link'));
+    if(attrs.length > 0) qs('body').classList.remove(attrs[0]);
     return;
   }
   
-  if(type) link.href = `themes/${type}.css`;
-  
-  if(qs('.black-style-link')) document.head.removeChild(qs('.black-style-link'));
-  
-  document.head.appendChild(link);
+  if(type) {
+    if(attrs.length > 0) {
+      if(type == attrs[0]) return;
+      
+      qs('body').classList.remove(attrs[0]);
+    }
+    
+    qs('body').classList.add(type + '_theme');
+  } else {
+    qs('body').classList.add(settings.theme + '_theme');
+  }
 }

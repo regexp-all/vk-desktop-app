@@ -1,9 +1,9 @@
 {
   "main": "index.js",
   "name": "vk-desktop-app",
-  "version": "0.4.8",
-  "build": 3,
-  "description": "Десктопное приложение ВКонтакте",
+  "version": "0.4.9",
+  "build": 1,
+  "description": "Клиент ВКонтакте для Windows и Linux",
   "author": "danyadev",
   "license": "Apache 2.0",
   "repository": {
@@ -12,5 +12,6 @@
   },
   "bugs": {
     "url": "https://github.com/danyadev/vk-desktop-app/issues"
-  }
+  },
+  "homepage": "https://github.com/danyadev/vk-desktop-app#readme"
 }
