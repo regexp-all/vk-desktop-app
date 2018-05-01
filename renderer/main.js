@@ -29,7 +29,8 @@ var header = qs('.header'),
     open_menu = qs('.open_menu'),
     open_menu_icon = qs('.open_menu_icon'),
     menu = qs('.menu'),
-    account_icon = qs('.acc_icon');
+    account_icon = qs('.acc_icon'),
+    settings_item = qs('.settings_item');
 
 var init = (users, user) => require('./js/init')(users, user);
 
@@ -92,6 +93,24 @@ qsa('a').forEach(link => {
     e.preventDefault();
     shell.openExternal(e.target.href);
   });
+});
+
+settings_item.addEventListener('contextmenu', () => {
+  utils.showContextMenu([
+    {
+      label: 'Открыть настройки',
+      click: () => settings_item.click()
+    },
+    {
+      label: 'Открыть DevTools',
+      click: () => {
+        if(getCurrentWindow().isDevToolsOpened()) getCurrentWindow().closeDevTools();
+        else getCurrentWindow().openDevTools();
+        
+        menu.style.left = MENU_WIDTH;
+      }
+    }
+  ]);
 });
 
 if(!fs.existsSync(USERS_PATH)) fs.writeFileSync(USERS_PATH, '{}');

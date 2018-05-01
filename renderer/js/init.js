@@ -11,7 +11,6 @@
 'use strict';
 
 const vkapi = require('./vkapi');
-const audio = require('./audio');
 
 var acc_status = qs('.menu_acc_status'),
     menu_account_bgc = qs('.menu_account_bgc'),
@@ -19,47 +18,55 @@ var acc_status = qs('.menu_acc_status'),
     menu = qs('.menu');
 
 var init = (users, user) => {
+  acc_status.innerHTML = user.status;
+  account_icon.style.backgroundImage = menu_account_bgc.style.backgroundImage = `url('${user.photo_100}')`;
+  full_name.innerHTML = `${user.first_name} ${user.last_name}`;
+  
+  danyadev.user = user;
+  
+  let items = [
+        'user', 'news',
+        'messages', 'audio',
+        'notifications', 'friends',
+        'groups', 'photos',
+        'videos', 'settings'
+      ], def_item = settings_json.settings.def_tab;
+      
+  require(`./modules/${items[def_item]}`).load(user);
+  
+  for(let i=0; i<items.length; i++) {
+    if(i == def_item) continue;
+    
+    menu.children[i].addEventListener('click', () => {
+      require(`./modules/${items[i]}`).load(user);
+    }, { once: true });
+  }
+  
   // добавить user_ids, куда впихивать каждого юзера.
   // (для мультиакка TODO)
-  vkapi.method('users.get', { fields: 'status,photo_100' }, data => {
-    let u = 0;
+  vkapi.method('users.get', {
+    fields: 'status,photo_100'
+  }, data => {
+    let res = data.response[0];
     
-    if(user.first_name != data.response[0].first_name) {
-      user.first_name = data.response[0].first_name;
-      u = 1;
-    }
-    
-    if(user.last_name != data.response[0].last_name) {
-      user.last_name = data.response[0].last_name;
-      u = 1;
-    }
-    
-    if(user.photo_100 != data.response[0].photo_100) {
-      user.photo_100 = data.response[0].photo_100;
-      u = 1;
-    }
-    
-    if(u) {
+    if(user.first_name != res.first_name
+        || user.last_name != res.last_name
+        || user.photo_100 != res.photo_100
+        || user.status != res.status) {
+      user.first_name = res.first_name;
+      user.last_name = res.last_name;
+      user.photo_100 = res.photo_100;
+      user.status = res.status;
+      
       users[user.id] = user;
       fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
+      
+      acc_status.innerHTML = user.status;
+      account_icon.style.backgroundImage = menu_account_bgc.style.backgroundImage = `url('${user.photo_100}')`;
+      full_name.innerHTML = `${user.first_name} ${user.last_name}`;
+      
+      danyadev.user = user;
     }
-    
-    acc_status.innerHTML = data.response[0].status;
-    account_icon.style.backgroundImage = menu_account_bgc.style.backgroundImage = `url('${user.photo_100}')`;
-    full_name.innerHTML = `${user.first_name} ${user.last_name}`;
-    
-    danyadev.user = user;
-    
-    // далее идет инициализация всех разделов. Сначала нужно инициализировать выбранный активный раздел.
-    // автоматизировать нахождение дефолтного таба и require нужного раздела
-    if(settings_json.settings.def_tab == 3) audio.load(user);
-    else {
-      menu.children[3].addEventListener('click', () => audio.load(user), { once: true });
-    }
-    
-    require('./settings');
-    
-    require('./user');
   });
 }
 

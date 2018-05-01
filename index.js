@@ -22,7 +22,7 @@ try {
       __dirname + '/node_modules',
       __dirname + '/package.json'
     ]
-})} catch(e){}
+})} catch(e) {};
 
 const { app, BrowserWindow } = require('electron');
 const fs = require('fs');
@@ -35,23 +35,23 @@ app.on('window-all-closed', () => {
 });
 
 app.on('ready', () => {
-  let winOpts = {
+  let opts = {
     width: settings.window.width,
     height: settings.window.height,
-    minWidth: 620,
+    minWidth: 640,
     minHeight: 480,
     show: false
   }
   
   if(settings.window.x && settings.window.y) {
-    winOpts.x = settings.window.x < 0 ? 0 : settings.window.x;
-    winOpts.y = settings.window.y < 0 ? 0 : settings.window.y;
+    opts.x = settings.window.x < 0 ? 0 : settings.window.x;
+    opts.y = settings.window.y < 0 ? 0 : settings.window.y;
   }
   
-  win = new BrowserWindow(winOpts);
+  win = new BrowserWindow(opts);
   
   win.setMenu(null); // удаление меню
   win.loadFile('renderer/index.html');
-  win.on('ready-to-show', () => win.show());
+  win.on('ready-to-show', win.show);
   win.on('closed', () => win = null);
 });

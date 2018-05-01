@@ -46,94 +46,68 @@ const querystring = require('querystring');
 const { getCurrentWindow } = require('electron').remote;
 const utils = require('./utils');
 const USERS_PATH = utils.USERS_PATH;
+const request = utils.request;
+const API_VERSION = 5.74;
+const captcha = require('./captcha');
 
-var toURL = obj => {
-      let s = [],
-          add = (k, v) => s[s.length] = `${k}=${v}`,
-          buildParams = (p, o) => {
-            let k;
-            
-            if(p) add(p, o);
-            else for(k in o) buildParams(k, o[k]);
-            
-            return s;
-          };
-
-      return buildParams('', obj).join('&');
-    },
-    md5 = data => require('crypto').createHash('md5').update(data).digest("hex"),
+var toURL = obj => querystring.stringify(obj),
     online_methods = [
       'account.setOnline', 'account.setOffline',
       'messages.getDialogs', 'messages.send',
-      'messages.sendSticker', 'wall.post'
-    ];
+      'messages.sendSticker', 'wall.post',
+      'newsfeed.get'
+    ]; // wall.post (без publish_date)
 
-// newsfeed.get (без feed_type=top)
-// wall.post (без publish_date)
-
-var method = (method, params, callback) => {
+var method = (method, params, callback, target) => {
   params   = params   || {};
   callback = callback || (() => {});
-  params.v = params.v || 5.74;
+  params.v = params.v || API_VERSION;
   
-  let secret, id, users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf-8'));
+  let id, users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf-8'));
   
-  Object.keys(users).forEach(user_id => { if(users[user_id].active) id = user_id });
+  Object.keys(users).forEach(user_id => {
+    if(users[user_id].active) id = user_id;
+  });
   
-  if(!id && !params.secret) {
-    getCurrentWindow().reload();
-    return;
-  }
-  
-  if(params.secret) {
-    secret = params.secret;
-    delete params.secret;
-  } else if(online_methods.indexOf(method) != -1) {
-    secret = users[id].online.secret;
-    if(!params.access_token) params.access_token = users[id].online.access_token;
-  } else secret = users[id].secret;
-  
-  if(!params.access_token) params.access_token = users[id].access_token;
-  
-  params.sig = md5('/method/' + method + '?' + toURL(params) + secret);
+  params.access_token = params.access_token || users[id].access_token;
   
   console.log(method, params);
   
-  https.request({
+  request({
     host: 'api.vk.com',
     path: `/method/${method}?${toURL(params)}`,
     method: 'GET',
     headers: { 'User-Agent': 'VKAndroidApp/4.13.1-1206' }
   }, res => {
-    let body = '';
+    let body = Buffer.alloc(0);
 
-    res.on('data', chunk => body += chunk);
+    res.on('data', ch => body = Buffer.concat([body, ch]));
     res.on('end', () => {
       body = JSON.parse(body);
       console.log(body);
       
       if(body.error) {
         if(body.error.error_msg == 'User authorization failed: invalid session.') {
-          // можно будет выводить окошечко
+          // можно будет выводить окошечко с формой входа, где будет логин и пароль уже введен
           delete users[id];
+          
           if(Object.keys(users).length > 0) users[Object.keys(users)[0]].active = true;
           fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
           getCurrentWindow().reload();
         }
+        
+        // captcha(body.captcha_img, body.captcha_sid, (key, sid) => {});
       }
       
       callback(body);
     });
-  }).on('error', err => {
-    // ошибки типа нет инета, долго нет ответа итд
-    console.log(err);
-  }).end()
+  }, target);
 }
 
-var auth = (authInfo, callback) => {
+var auth = (authInfo, callback, target) => {
   let users = fs.readFileSync(USERS_PATH, 'utf-8');
   
-  if(authInfo.login[0] == '+') authInfo.login = authInfo.login.replace('+', '');
+  authInfo.login = authInfo.login.replace('+', '');
   
   let reqData = {
     grant_type: 'password',
@@ -141,10 +115,10 @@ var auth = (authInfo, callback) => {
     client_secret: 'hHbZxrka2uZ6jB1inYsH',
     username: authInfo.login,
     password: authInfo.password,
-    scope: 'nohttps,all',
+    scope: 'all',
     '2fa_supported': true,
     force_sms: true,
-    v: authInfo.v || 5.74
+    v: API_VERSION
   }
   
   if(authInfo.captcha_sid && authInfo.captcha_key) {
@@ -156,39 +130,45 @@ var auth = (authInfo, callback) => {
   
   console.log(reqData);
   
-  https.get({
+  request({
     host: 'oauth.vk.com',
     path: `/token/?${toURL(reqData)}`
   }, res => {
-    let data = '';
+    let body = Buffer.alloc(0);
 
-    res.on('data', body => data += body);
+    res.on('data', ch => body = Buffer.concat([body, ch]));
     res.on('end', () => {
-      data = JSON.parse(data);
+      body = JSON.parse(body);
       users = JSON.parse(users);
       
       console.log(authInfo);
-      console.log(data);
+      console.log(body);
       
-      if(data.error) {
-        callback(data);
+      if(body.error) {
+        if(body.error == 'need_captcha') {
+          qs('.login_button').disabled = false;
+          
+          captcha(body.captcha_img, body.captcha_sid, (key, sid) => {
+            auth(Object.assign(authInfo, { captcha_key: key, captcha_sid: sid }),
+                 callback,
+                 target);
+          });
+        } else callback(body);
+        
         return;
       }
       
       method('users.get', {
-        access_token: data.access_token,
-        user_id: data.user_id,
-        secret: data.secret,
-        fields: 'photo_100',
-        v: 5.74
+        access_token: body.access_token,
+        user_id: body.user_id,
+        fields: 'status,photo_100'
       }, user_info => {
         refreshToken({
-          access_token: data.access_token,
-          secret: data.secret
-        }, ref_data => {
-          let userInfo = {
+          access_token: body.access_token
+        }, ref_token => {
+          users[body.user_id] = {
             active: true,
-            id: data.user_id,
+            id: body.user_id,
             platform: authInfo.platform,
             login: authInfo.login,
             password: authInfo.password,
@@ -196,34 +176,25 @@ var auth = (authInfo, callback) => {
             first_name: user_info.response[0].first_name,
             last_name: user_info.response[0].last_name,
             photo_100: user_info.response[0].photo_100,
-            online: {
-              access_token: data.access_token,
-              secret:  data.secret
-            },
-            access_token: ref_data.access_token,
-            secret: ref_data.secret
+            status: user_info.response[0].status,
+            online_token: body.access_token,
+            access_token: ref_token
           };
           
-          console.log(ref_data);
-          console.log(userInfo);
+          console.log(users[body.user_id]);
           
-          users[data.user_id] = userInfo;
-          
-          fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
-          callback(users);
+          fs.writeFile(USERS_PATH, JSON.stringify(users, null, 2), () => callback(users));
         });
       });
     });
-  });
+  }, target);
 };
 
 var refreshToken = (data, callback) => {
   method('auth.refreshToken', {
     access_token: data.access_token,
-    secret: data.secret, // TODO: реализовать получение receipt'a
-    receipt: 'JSv5FBbXbY:APA91bF2K9B0eh61f2WaTZvm62GOHon3-vElmVq54ZOL5PHpFkIc85WQUxUH_wae8YEUKkEzLCcUC5V4bTWNNPbjTxgZRvQ-PLONDMZWo_6hwiqhlMM7gIZHM2K2KhvX-9oCcyD1ERw4',
-    v: 5.74
-  }, ref => callback({ access_token: ref.response.token, secret: ref.response.secret }))
+    receipt: 'JSv5FBbXbY:APA91bF2K9B0eh61f2WaTZvm62GOHon3-vElmVq54ZOL5PHpFkIc85WQUxUH_wae8YEUKkEzLCcUC5V4bTWNNPbjTxgZRvQ-PLONDMZWo_6hwiqhlMM7gIZHM2K2KhvX-9oCcyD1ERw4'
+  }, ref => callback(ref.response.token));
 };
 
 var resetOnline = (authInfo, callback) => {
@@ -237,10 +208,10 @@ var resetOnline = (authInfo, callback) => {
     client_secret: keys[authInfo.platform[0]][1],
     username: authInfo.login,
     password: authInfo.password,
-    scope: 'nohttps,all',
+    scope: 'all',
     '2fa_supported': true,
     force_sms: true,
-    v: authInfo.v || 5.74
+    v: API_VERSION
   }
   
   if(authInfo.captcha_sid && authInfo.captcha_key) {
@@ -250,28 +221,27 @@ var resetOnline = (authInfo, callback) => {
   
   if(authInfo.code) reqData.code = authInfo.code;
   
-  https.get({
+  request({
     host: 'oauth.vk.com',
     path: `/token/?${toURLogin(reqData)}`
   }, res => {
-    let data = '';
+    let body = Buffer.alloc(0);
 
-    res.on('data', body => data += body);
+    res.on('data', ch => body = Buffer.concat([body, ch]));
     res.on('end', () => {
-      data = JSON.parse(data);
+      body = JSON.parse(body);
       users = JSON.parse(users);
       
       console.log(authInfo);
-      console.log(data);
+      console.log(body);
       
-      if(data.error) {
-        callback(data);
+      if(body.error) {
+        callback(body);
         return;
       }
         
       let online = {
-        access_token: data.access_token,
-        secret:  data.secret
+        access_token: body.access_token
       };
       
       // вставляем онлайн в текущий онлайн
@@ -289,7 +259,7 @@ var longpoll = (params, callback) => {
     version: params.version || 2
   }
   
-  https.get(`https://${params.server}?${toURL(options)}`, data => {
+  request(`https://${params.server}?${toURL(options)}`, data => {
     console.log(data);
   });
 };

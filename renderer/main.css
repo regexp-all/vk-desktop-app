@@ -16,13 +16,14 @@
 @import "css/ui.css";
 @import "css/audio.css";
 @import "css/settings.css";
+@import "css/news.css";
+@import "css/groups.css";
 
 * { box-sizing: border-box }
 
 body {
-  font-family: 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
+  font-family: 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
   font-size: 14px;
   margin: 0;
-  min-width: 300px;
   overflow: hidden;
 }

@@ -26,6 +26,13 @@
   color: #bbb;
 }
 
+.dark_theme .input,
+.dark_theme .settings_input { border: 1px solid #282828 }
+
+.dark_theme .settings_line:not(:last-child) {
+  border-bottom: 1px solid #282828;
+}
+
 /* стили для выделенных в меню элементов */
 .dark_theme .menu_item:hover,
 .dark_theme .menu_item_active:not(.menu_account_item),

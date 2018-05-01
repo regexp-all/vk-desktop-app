@@ -1,4 +1,4 @@
-const vkapi = require('./vkapi');
+const vkapi = require('./../vkapi');
 
 var renderUser = id => {
   // id <- danyadev.user.id
@@ -9,4 +9,11 @@ var renderUser = id => {
   });
 }
 
-module.exports = renderUser;
+var load = () => {
+  console.log('user loaded');
+}
+
+module.exports = {
+  renderUser,
+  load
+}

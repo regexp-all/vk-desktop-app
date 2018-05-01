@@ -1,0 +1,32 @@
+/* 
+  Copyright © 2018 danyadev
+
+  Контактные данные:
+   vk: https://vk.com/danyadev
+   telegram: https://t.me/danyadev
+   альтернативная ссылка: https://t.elegram.ru/danyadev
+   github: https://github.com/danyadev/vk-desktop-app
+*/
+
+.news_content {
+  padding: 20px;
+}
+
+.news_block {
+  background-color: white;
+  box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
+  border-radius: 2px;
+  padding: 10px;
+  margin-bottom: 15px;
+  overflow-wrap: break-word;
+}
+
+.news_block_err {
+  margin: 0 20px;
+}
+
+.news_inet_err {
+  margin: 20px auto;
+  width: 220px;
+  text-align: center;
+}

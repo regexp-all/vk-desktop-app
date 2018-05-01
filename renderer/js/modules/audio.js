@@ -12,21 +12,17 @@
 
 const { BrowserWindow } = require('electron').remote;
 const https = require('https');
-const vkapi = require('./vkapi');
+const vkapi = require('./../vkapi');
 
 danyadev.audio = {};
 
 var audio = qs('.audio'),
-    audiolist_load = qs('.audiolist_load'),
-    audiolist_utils = qs('.audiolist_utils'),
     audiolist = qs('.audiolist'),
     audioplayer = qs('.audioplayer'),
     content = qs('.content'),
     player_cover = qs('.player_cover'),
-    player_btn = qs('.player_btn'),
     player_back = qsa('.player_button')[0],
     player_next = qsa('.player_button')[1],
-    player_name = qs('.player_name'),
     player_real_time = qs('.player_real_time'),
     player_played_time = qs('.player_played_time'),
     player_progress_loaded = qs('.player_progress_loaded'),
@@ -34,7 +30,7 @@ var audio = qs('.audio'),
     player_progress_wrap = qs('.player_progress_wrap'),
     player_volume_wrap = qs('.player_volume_wrap'),
     player_volume_this = qs('.player_volume_this'),
-    shuffle = qs('.shuffle'),
+    player_icon_repeat = qs('.player_icon_repeat'),
     settings_json = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf-8'));
 
 audio._play = audio.play;
@@ -49,7 +45,8 @@ audio.play = () => audio._play().catch(err => {
 player_volume_this.style.width = settings_json.audio.volume * 100 + '%';
 audio.volume = settings_json.audio.volume;
 
-danyadev.audio.renderedItems = 0, danyadev.audio.track_id = 0;
+danyadev.audio.renderedItems = 0;
+danyadev.audio.track_id = 0;
 
 var load = () => {
   vkapi.method('audio.get', null, data => {
@@ -57,18 +54,17 @@ var load = () => {
     danyadev.audio.list = data.response.items;
     
     if(!danyadev.audio.list.length) {
-      audiolist_load.innerHTML = 'Список аудиозаписей пуст';
+      qs('.audiolist_info').innerHTML = 'Список аудиозаписей пуст';
     } else render();
-  });
+  }, 'audiolist_info');
 }
 
 var render = cb => {
   let block = { innerHTML: '' },
-      id = danyadev.audio.renderedItems,
       endID = danyadev.audio.renderedItems + 15;
   
   let renderItem = () => {
-    let item = danyadev.audio.list[id],
+    let item = danyadev.audio.list[danyadev.audio.renderedItems],
         minutes = Math.floor(item.duration / 60), cover,
         hours = minutes >= 60 ? Math.floor(minutes / 60) + ':' : '',
         secondsZero = (item.duration % 60) < 10 ? '0' : '',
@@ -89,7 +85,7 @@ var render = cb => {
     
     if(item.url) {
       audio_block = `<div class='audio_item' src='${item.url}' `
-                  + `onclick='require("./js/audio").toggleAudio(this, event)'>`;
+                  + `onclick='require("./js/modules/audio").toggleAudio(this, event)'>`;
     } else audio_block = `<div class='audio_item_locked' title='Аудиозапись изъята из публичного доступа'>`;
     
     // innerHTML тут для подсветки HTML синтаксиса в Atom'е
@@ -103,25 +99,28 @@ var render = cb => {
           <div class='audio_name'>${item.title}</div>
           <div class='audio_author'>${item.artist}</div>
         </div>
-        <div class='audio_right_btns'>
-          <div></div> <!-- тут будут все кнопки вместо 1 скачки, при наведении -->
+        <div class='audio_right_block'>
+          <div class='audio_right_btns'>
+            <!-- тут будут все кнопки вместо 1 скачки, при наведении -->
+          </div>
           <div class='audio_real_time audio_active_time'>${time}</div>
           <div class='audio_played_time'>0:00</div>
         </div>
       </div>
     `.trim();
     
-    id++;
     danyadev.audio.renderedItems++;
     
-    if(id < endID && danyadev.audio.list[id]) {
+    if(danyadev.audio.renderedItems < endID && danyadev.audio.list[danyadev.audio.renderedItems]) {
       setTimeout(renderItem, 0);
     } else {
-      if(id == 15) { // когда загрузился первый блок
+      if(danyadev.audio.renderedItems == 15
+      || (danyadev.audio.renderedItems < 15 &&
+      danyadev.audio.renderedItems == danyadev.audio.count)) { // когда загрузился первый блок
         audiolist.innerHTML = '';
         
-        audiolist_load.style.display = 'none';
-        audiolist_utils.style.display = 'block';
+        qs('.audiolist_info').style.display = 'none';
+        qs('.audiolist_utils').style.display = 'block';
       }
       
       audiolist.innerHTML += block.innerHTML;
@@ -142,12 +141,29 @@ var render = cb => {
   renderItem();
 }
 
-shuffle.addEventListener('click', () => {
+player_icon_repeat.addEventListener('click', () => {
+  if(player_icon_repeat.classList.contains('active')) {
+    player_icon_repeat.classList.remove('active');
+    
+    danyadev.audio.repeat = false;
+  } else {
+    player_icon_repeat.classList.add('active');
+    
+    danyadev.audio.repeat = true;
+  }
+});
+
+qs('.shuffle').addEventListener('click', () => {
   if(danyadev.audio.renderedItems % 15 != 0
     && danyadev.audio.renderedItems != danyadev.audio.count) return;
   
   danyadev.audio.track_id = 0;
   danyadev.audio.renderedItems = 0;
+  danyadev.audio.repeat = false;
+  
+  if(player_icon_repeat.classList.contains('active')) {
+    player_icon_repeat.classList.remove('active');
+  }
   
   if(!audio.paused) {
     toggleAudio();
@@ -190,7 +206,7 @@ var initPlayer = () => {
         player_cover.style.backgroundImage = bgi;
       } else player_cover.style.backgroundImage = 'url("images/empty_cover.svg")';
       
-      player_name.innerHTML = '<span class=\'player_author\'>'
+      qs('.player_name').innerHTML = '<span class=\'player_author\'>'
       + audio.audio_item.children[1].children[1].innerHTML + '</span> – '
       + audio.audio_item.children[1].children[0].innerHTML;
     }
@@ -200,9 +216,11 @@ var initPlayer = () => {
 }
 
 var renderNewItems = () => {
-  let h = window.screen.height > audiolist.clientHeight;
+  let h = window.screen.height > audiolist.clientHeight,
+      l = audiolist.clientHeight - window.outerHeight < content.scrollTop,
+      a = qs('.content_audio').parentNode.classList.contains('content_active');
   
-  if(h || audiolist.clientHeight && audiolist.clientHeight - window.outerHeight < content.scrollTop) {
+  if(a && (h || l)) {
     content.removeEventListener('scroll', renderNewItems);
     render();
   }
@@ -276,7 +294,7 @@ var toggleAudio = (track, event) => {
       player_cover.style.backgroundImage = bgi;
     } else player_cover.style.backgroundImage = 'url("images/empty_cover.svg")';
     
-    player_name.innerHTML = '<span class=\'player_author\'>'
+    qs('.player_name').innerHTML = '<span class=\'player_author\'>'
     + audio.audio_item.children[1].children[1].innerHTML + '</span> – '
     + audio.audio_item.children[1].children[0].innerHTML;
   }
@@ -287,7 +305,7 @@ var toggleAudio = (track, event) => {
     audio_item.classList.add('audio_item_active');
     
     if(qs('.player_play')) {
-      player_btn.title = 'Приостановить';
+      qs('.player_btn').title = 'Приостановить';
       
       qs('.player_play').classList.add('player_pause');
       qs('.player_play').classList.remove('player_play');
@@ -298,7 +316,7 @@ var toggleAudio = (track, event) => {
     cover_util.classList.add('audio_cover_play');
     cover_util.classList.remove('audio_cover_stop');
     
-    player_btn.title = 'Воспроизвести';
+    qs('.player_btn').title = 'Воспроизвести';
     
     qs('.player_pause').classList.add('player_play');
     qs('.player_pause').classList.remove('player_pause');
@@ -354,9 +372,17 @@ player_back.addEventListener('click', () => {
   
   if(!audioItem && !audio.paused) toggleAudio(audiolist.children[0]);
   else if(!audioItem) {
-    danyadev.audio.play_prev = 0;
+    danyadev.audio.play_prev = false;
     return;
-  } else toggleAudio(audioItem);
+  } else {
+    danyadev.audio.repeat = false;
+    
+    if(player_icon_repeat.classList.contains('active')) {
+      player_icon_repeat.classList.remove('active');
+    }
+    
+    toggleAudio(audioItem);
+  }
 });
 
 player_next.addEventListener('click', () => {
@@ -372,23 +398,38 @@ player_next.addEventListener('click', () => {
     } else audioTrack = audiolist.children[0];
   }
   
-  danyadev.audio.play_prev = 0;
+  danyadev.audio.play_prev = false;
+  danyadev.audio.repeat = false;
+  
+  if(player_icon_repeat.classList.contains('active')) {
+    player_icon_repeat.classList.remove('active');
+  }
   
   toggleAudio(audioTrack);
 });
 
-player_btn.addEventListener('click', () => {
+qs('.player_btn').addEventListener('click', () => {
   let audioItem = audiolist.children[danyadev.audio.track_id];
   
   toggleAudio(audioItem);
 });
 
 audio.addEventListener('ended', () => { // переключение на следующее аудио
-  audio.audio_item.children[0].children[1].classList.add('audio_cover_play');
-  audio.audio_item.children[0].children[1].classList.remove('audio_cover_stop');
-  audio.audio_item.classList.remove('audio_item_active');
+  let id;
   
-  let audioItem = audiolist.children[danyadev.audio.track_id + 1];
+  if(!danyadev.audio.repeat) {
+    audio.audio_item.children[0].children[1].classList.add('audio_cover_play');
+    audio.audio_item.children[0].children[1].classList.remove('audio_cover_stop');
+    audio.audio_item.classList.remove('audio_item_active');
+    
+    if(player_icon_repeat.classList.contains('active')) {
+      player_icon_repeat.classList.remove('active');
+    }
+    
+    id = danyadev.audio.track_id + 1;
+  } else id = danyadev.audio.track_id;
+  
+  let audioItem = audiolist.children[id];
   
   if(!audioItem) {
     if(danyadev.audio.renderedItems < danyadev.audio.count) {

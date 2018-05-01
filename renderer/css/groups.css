@@ -1,0 +1,60 @@
+/* 
+  Copyright © 2018 danyadev
+
+  Контактные данные:
+   vk: https://vk.com/danyadev
+   telegram: https://t.me/danyadev
+   альтернативная ссылка: https://t.elegram.ru/danyadev
+   github: https://github.com/danyadev/vk-desktop-app
+*/
+
+.group_wrap {
+  padding: 10px;
+}
+
+.group_item {
+  background-color: white;
+  width: 100%;
+  max-width: 550px;
+  height: 80px;
+  padding: 5px;
+  box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
+  border-radius: 2px;
+  margin-bottom: 10px;
+}
+
+.group_img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  float: left;
+  margin-right: 12px;
+}
+
+.group_names {
+  float: left;
+  padding-top: 2px;
+  width: calc(100% - 92px);
+}
+
+.group_name, .group_type, .group_subs {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.group_name {
+  color: #2a5885;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.group_type {
+  color: #656565;
+  padding-top: 4px;
+}
+
+.group_subs {
+  color: #656565;
+  padding-top: 4px;
+}

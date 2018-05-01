@@ -30,7 +30,6 @@ open_devTools.addEventListener('click', () => {
   else getCurrentWindow().openDevTools();
 });
 
-// кнопка для показа и скрытия пароля
 show_password.addEventListener('click', () => {
   if(show_password.classList.contains('active')) {
     show_password.classList.remove('active');
@@ -41,11 +40,7 @@ show_password.addEventListener('click', () => {
   }
 });
 
-login_input.onkeydown = password_input.onkeydown = e => {
-  if(e.keyCode == 13) login_button.click();
-}
-
-sms_code.onkeydown = e => {
+wrapper_login.onkeydown = e => {
   if(e.keyCode == 13) login_button.click();
 }
 
@@ -65,22 +60,18 @@ login_button.addEventListener('click', () => {
   auth();
 });
 
-var auth = mainAuth => {
+var auth = params => {
   vkapi.auth({
     login: login_input.value,
     password: password_input.value,
     platform: [0, 'Android'],
-    captcha_sid: mainAuth && mainAuth.sid,
-    captcha_key: mainAuth && mainAuth.key,
+    captcha_sid: params && params.sid,
+    captcha_key: params && params.key,
     code: sms_code.value
   }, data => {
     login_button.disabled = false;
     
     if(data.error) {
-      if(data.error == 'need_captcha') {
-        captcha(data.captcha_img, data.captcha_sid, (key, sid) => auth({key, sid}));
-      }
-      
       if(data.error_description == 'Username or password is incorrect') {
         error_info.innerHTML = 'Неверный логин или пароль';
       }
@@ -103,7 +94,7 @@ var auth = mainAuth => {
     error_info.innerHTML = '';
     twofa_info.innerHTML = '';
     
-    wrapper_login.style.display = 'none';
+    wrapper_login.style.display = '';
     wrapper_content.style.display = 'block';
     
     users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf-8'));
@@ -114,5 +105,5 @@ var auth = mainAuth => {
         return;
       }
     });
-  });
+  }, 'error_info');
 }

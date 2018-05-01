@@ -13,6 +13,8 @@
 const https = require('https');
 const path = require('path');
 const { dialog, app } = require('electron').remote;
+const request = utils.request;
+const app_path = utils.app_path;
 
 var mkdirP = p => {
   p = path.resolve(p);
@@ -28,10 +30,10 @@ var mkdirP = p => {
 };
 
 var getGithubFiles = (user, repo, removeList, callback) => {
-  let fileList = [], allFiles = [];
+  let fileList = [], allFiles = [], dirCount = 0, dirs = 0;
   
   let sendReq = path => {
-    https.get({
+    request({
       host: 'api.github.com',
       path: `/repos/${user}/${repo}/contents/${path}?client_id=2cca2222a6f211d96eb5&client_secret=7ca0d642c52d3c5c4d793782993da8691152a8f3`,
       headers: { 'User-Agent': 'vk.com/danyadev' }
@@ -40,18 +42,23 @@ var getGithubFiles = (user, repo, removeList, callback) => {
       
       res.on('data', ch => body += ch);
       res.on('end', () => {
-        let data = JSON.parse(body), dir = 0;
+        let data = JSON.parse(body);
         
-        for(let i = 0; i<Object.keys(data).length; i++) {
-          let key = Object.keys(data)[i], _path = `.${path}/`;
-          
-          if(data[key].type == 'dir') {
-            sendReq(path + '/' + data[key].name);
-            dir = 1;
+        dirs++;
+        
+        for(let i = 0; i<data.length; i++) {
+          if(data[i].type == 'dir') {
+            sendReq(path + '/' + data[i].name);
           } else {
-            fileList.push(_path + data[key].name);
+            fileList.push(app_path + path + '/' + data[i].name);
+          }
+          
+          if(i == data.length-1) {
+            data.forEach(file => {
+              if(file.type == 'dir') dirCount++;
+            });
             
-            if(!dir && Object.keys(data).length-1 == i) {
+            if(dirs > dirCount) {
               allFiles = allFiles.concat(fileList);
               
               removeList.forEach((file, i) => {
@@ -71,55 +78,44 @@ var getGithubFiles = (user, repo, removeList, callback) => {
 }
 
 var getLocalFiles = callback => {
-  let allFilesList = [], filesList = [];
-  
-  let readDir = path => {
-    let dir = 0, slash = path ? '' : './';
+  let getFiles = (dir, files_) => {
+    files_ = files_ || [];
+
+    let files = fs.readdirSync(dir);
     
-    fs.readdir(slash + path, (e, files) => {
-      for(let i = 0; i < files.length; i++) {
-        if(files[i] == '.git' || files[i] == 'core') continue;
-        
-        let file = path ? path + '/' + files[i] : files[i],
-            isDIR = 0;
-            
-        try {
-          isDIR = fs.statSync(slash + file).isDirectory()
-        } catch(e) {
-          if(e.code == 'ENOENT') return;
-          
-          throw e;
-        }
-        
-        if(isDIR) {
-          readDir(slash + file);
-          dir = 1;
-        } else {
-          allFilesList.push(slash + file);
-        
-          if(!dir && files.length-1 == i) callback(allFilesList);
-        }
-      }
-    });
-  }
-  
-  readDir('');
+    for(let i in files) {
+      let name = dir + '/' + files[i];
+      
+      if(files[i] == 'dev.json') continue;
+      
+      if(fs.statSync(name).isDirectory()) {
+        getFiles(name, files_);
+      } else files_.push(name.replace(/\\/g, '/'));
+    }
+
+    return files_;
+  };
+
+  callback(getFiles(app_path));
 }
 
 var update = () => {
-  https.get('https://raw.githubusercontent.com/danyadev/vk-desktop-app/master/package.json', res => {
+  request('https://raw.githubusercontent.com/danyadev/vk-desktop-app/master/package.json', res => {
     let body = '';
 
     res.on('data', ch => body += ch);
     res.on('end', () => {
-      let loc_package = require(__dirname + '/../../package.json'),
+      let loc_package = require(app_path + '/package.json'),
           ext_package = JSON.parse(body),
           v0 = ext_package.version.split('.'),
           v1 = loc_package.version.split('.'),
           newBuild = ext_package.build > loc_package.build;
 
       if(utils.update && (v0[0] > v1[0] || v0[1] > v1[1] || v0[2] > v1[2] || newBuild)) {
-        let noUpdate = ['./renderer/settings.json', './renderer/users.json'];
+        let noUpdate = [
+          app_path + '/renderer/settings.json',
+          app_path + '/renderer/users.json'
+        ];
         
         getGithubFiles('danyadev', 'vk-desktop-app', noUpdate, (files, allFiles) => {
           getLocalFiles(localFiles => {
@@ -129,15 +125,12 @@ var update = () => {
           });
           
           files.forEach((filename, i) => {
-            let match = filename.match(/[A-z]+\.?[A-z]+/g),
-                realFileName = match[match.length-1],
-                realPathToFile = filename.replace(realFileName, '');
-                
-            if(!fs.existsSync(filename)) mkdirP(realPathToFile);
+            let githubFile = filename.replace(app_path+'/', '');
             
-            https.get({
+            if(!fs.existsSync(filename)) mkdirP(filename);
+            request({
               host: 'raw.githubusercontent.com',
-              path: `/danyadev/vk-desktop-app/master/${filename}`
+              path: `/danyadev/vk-desktop-app/master/${encodeURIComponent(githubFile)}`
             }, res => {
               let body = Buffer.alloc(0);
               
