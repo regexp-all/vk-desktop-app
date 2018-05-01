@@ -137,7 +137,6 @@ var update = () => {
               res.on('data', ch => body = Buffer.concat([body, ch]));
               res.on('end', () => {
                 fs.writeFile(filename, body, () => {
-                  // если делать полоску - то тут можно делать loaded++ и прибавлять проценты
                   if(i == files.length - 1) {
                     dialog.showMessageBox({
                       type: 'info',

@@ -26,6 +26,15 @@
   color: #bbb;
 }
 
+.dark_theme .group_name {
+  color: #ebebeb;
+}
+
+.dark_theme .group_type,
+.dark_theme .group_subs {
+  color: #919191;
+}
+
 .dark_theme .input,
 .dark_theme .settings_input { border: 1px solid #282828 }
 

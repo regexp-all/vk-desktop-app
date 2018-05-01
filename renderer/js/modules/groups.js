@@ -79,7 +79,7 @@ var render = () => {
     }
     
     block.innerHTML += `
-      <div class="group_item">
+      <div class="group_item theme_block">
         <img src="${group.photo_100}" class="group_img">
         <div class="group_names">
           <div class="group_name">${group.name}</div>

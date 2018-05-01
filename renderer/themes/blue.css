@@ -26,6 +26,15 @@
   color: #c2c2c2;
 }
 
+.blue_theme .group_name {
+  color: #ebebeb;
+}
+
+.blue_theme .group_type,
+.blue_theme .group_subs {
+  color: #919191;
+}
+
 .blue_theme .input,
 .blue_theme .settings_input { border: 1px solid #19222e }
 

@@ -45,16 +45,11 @@
 
 .group_name {
   color: #2a5885;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
 }
 
-.group_type {
-  color: #656565;
-  padding-top: 4px;
-}
-
-.group_subs {
+.group_type, .group_subs {
   color: #656565;
   padding-top: 4px;
 }

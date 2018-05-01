@@ -25,10 +25,7 @@ var login_input = qs('.login_input'),
     
 wrapper_login.style.display = 'flex';
 
-open_devTools.addEventListener('click', () => {
-  if(getCurrentWindow().isDevToolsOpened()) getCurrentWindow().closeDevTools();
-  else getCurrentWindow().openDevTools();
-});
+open_devTools.addEventListener('click', () => getCurrentWindow().toggleDevTools());
 
 show_password.addEventListener('click', () => {
   if(show_password.classList.contains('active')) {
@@ -64,12 +61,12 @@ var auth = params => {
   vkapi.auth({
     login: login_input.value,
     password: password_input.value,
-    platform: [0, 'Android'],
-    captcha_sid: params && params.sid,
-    captcha_key: params && params.key,
+    platform: 0,
     code: sms_code.value
   }, data => {
     login_button.disabled = false;
+    
+    // TODO: весь рендер и пихание данных перенести сюда
     
     if(data.error) {
       if(data.error_description == 'Username or password is incorrect') {

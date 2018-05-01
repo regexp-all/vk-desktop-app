@@ -104,29 +104,29 @@ var method = (method, params, callback, target) => {
   }, target);
 }
 
-var auth = (authInfo, callback, target) => {
+var auth = (params, callback, target) => {
   let users = fs.readFileSync(USERS_PATH, 'utf-8');
   
-  authInfo.login = authInfo.login.replace('+', '');
+  params.login = params.login.replace('+', '');
   
   let reqData = {
     grant_type: 'password',
     client_id: 2274003, // Android ключики
     client_secret: 'hHbZxrka2uZ6jB1inYsH',
-    username: authInfo.login,
-    password: authInfo.password,
+    username: params.login,
+    password: params.password,
     scope: 'all',
     '2fa_supported': true,
     force_sms: true,
     v: API_VERSION
   }
   
-  if(authInfo.captcha_sid && authInfo.captcha_key) {
-    reqData.captcha_sid = authInfo.captcha_sid;
-    reqData.captcha_key = authInfo.captcha_key;
+  if(params.captcha_sid && params.captcha_key) {
+    reqData.captcha_sid = params.captcha_sid;
+    reqData.captcha_key = params.captcha_key;
   }
   
-  if(authInfo.code) reqData.code = authInfo.code;
+  if(params.code) reqData.code = params.code;
   
   console.log(reqData);
   
@@ -141,7 +141,7 @@ var auth = (authInfo, callback, target) => {
       body = JSON.parse(body);
       users = JSON.parse(users);
       
-      console.log(authInfo);
+      console.log(params);
       console.log(body);
       
       if(body.error) {
@@ -149,7 +149,7 @@ var auth = (authInfo, callback, target) => {
           qs('.login_button').disabled = false;
           
           captcha(body.captcha_img, body.captcha_sid, (key, sid) => {
-            auth(Object.assign(authInfo, { captcha_key: key, captcha_sid: sid }),
+            auth(Object.assign(params, { captcha_key: key, captcha_sid: sid }),
                  callback,
                  target);
           });
@@ -169,9 +169,9 @@ var auth = (authInfo, callback, target) => {
           users[body.user_id] = {
             active: true,
             id: body.user_id,
-            platform: authInfo.platform,
-            login: authInfo.login,
-            password: authInfo.password,
+            platform: params.platform,
+            login: params.login,
+            password: params.password,
             downloadPath: process.env.USERPROFILE + '\\Downloads\\',
             first_name: user_info.response[0].first_name,
             last_name: user_info.response[0].last_name,
@@ -197,29 +197,29 @@ var refreshToken = (data, callback) => {
   }, ref => callback(ref.response.token));
 };
 
-var resetOnline = (authInfo, callback) => {
+var resetOnline = (params, callback) => {
   let users = fs.readFileSync(USERS_PATH, 'utf-8');
   
-  if(authInfo.login[0] == '+') authInfo.login = authInfo.login.replace('+', '');
+  params.login = params.login.replace('+', '');
   
   let reqData = {
     grant_type: 'password',
-    client_id: keys[authInfo.platform[0]][0],
-    client_secret: keys[authInfo.platform[0]][1],
-    username: authInfo.login,
-    password: authInfo.password,
+    client_id: keys[params.platform[0]][0],
+    client_secret: keys[params.platform[0]][1],
+    username: params.login,
+    password: params.password,
     scope: 'all',
     '2fa_supported': true,
     force_sms: true,
     v: API_VERSION
   }
   
-  if(authInfo.captcha_sid && authInfo.captcha_key) {
-    reqData.captcha_sid = authInfo.captcha_sid;
-    reqData.captcha_key = authInfo.captcha_key;
+  if(params.captcha_sid && params.captcha_key) {
+    reqData.captcha_sid = params.captcha_sid;
+    reqData.captcha_key = params.captcha_key;
   }
   
-  if(authInfo.code) reqData.code = authInfo.code;
+  if(params.code) reqData.code = params.code;
   
   request({
     host: 'oauth.vk.com',
@@ -232,7 +232,7 @@ var resetOnline = (authInfo, callback) => {
       body = JSON.parse(body);
       users = JSON.parse(users);
       
-      console.log(authInfo);
+      console.log(params);
       console.log(body);
       
       if(body.error) {
