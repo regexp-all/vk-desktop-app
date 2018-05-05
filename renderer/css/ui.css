@@ -1,4 +1,4 @@
-/* 
+/*
   Copyright © 2018 danyadev
 
   Контактные данные:
@@ -28,7 +28,10 @@
   transition: background-color .3s;
 }
 
-.open_menu:hover { background-color: #3f638c }
+.open_menu:hover {
+  background-color: #3f638c;
+  cursor: pointer;
+}
 
 .open_menu_icon {
   width: 100%;
