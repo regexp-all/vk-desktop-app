@@ -70,8 +70,9 @@
 /* и для самой иконки */
 .blue_theme .open_menu_icon { background-color: #bbbbbb }
 
-/* стили для пустого кавера в плеере */
+/* стили для пустого кавера */
 .blue_theme .player_cover { background-color: #2e3e52 }
+.blue_theme .audio_cover { background-color: #2e3e52 }
 
 /* стили для полоски перемотки трека */
 .blue_theme .player_progress_all { background-color: #4a4a4a }

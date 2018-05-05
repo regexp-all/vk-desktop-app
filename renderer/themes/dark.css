@@ -94,8 +94,9 @@ a {
 /* и для самой иконки */
 .dark_theme .open_menu_icon { background-color: #bbbbbb }
 
-/* стили для пустого кавера в плеере */
+/* стили для пустого кавера */
 .dark_theme .player_cover { background-color: #414145 }
+.dark_theme .audio_cover { background-color: #414145 }
 
 /* стили для полоски перемотки трека */
 .dark_theme .player_progress_all { background-color: #4a4a4a }
