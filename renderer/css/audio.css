@@ -1,10 +1,11 @@
 /* 
   Copyright © 2018 danyadev
+  Лицензия - Apache 2.0
 
   Контактные данные:
    vk: https://vk.com/danyadev
+   или https://vk.com/danyadev0
    telegram: https://t.me/danyadev
-   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 
@@ -13,7 +14,10 @@
   justify-content: center;
 }
 
-.pl50 { height: 50px; display: none } /* заглушка для плеера, чтобы не скакал при переводе на fixed */
+.pl50 {
+  height: 50px;
+  display: none;
+}
 
 .audioplayer {
   min-width: 320px;
@@ -27,6 +31,11 @@
   z-index: 1;
   top: 0;
   transition: background-color .3s, box-shadow .3s;
+}
+
+.audioplayer_fixed {
+  position: fixed;
+  margin-top: 44px;
 }
 
 .player_cover {

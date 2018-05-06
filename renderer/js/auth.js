@@ -1,16 +1,16 @@
 /* 
   Copyright © 2018 danyadev
+  Лицензия - Apache 2.0
 
   Контактные данные:
    vk: https://vk.com/danyadev
+   или https://vk.com/danyadev0
    telegram: https://t.me/danyadev
-   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 
 'use strict';
 
-const vkapi = require('./vkapi');
 const captcha = require('./captcha');
 
 var login_input = qs('.login_input'),
@@ -57,6 +57,13 @@ login_button.addEventListener('click', () => {
   auth();
 });
 
+var refreshToken = (data, callback) => {
+  vkapi.method('auth.refreshToken', {
+    access_token: data.access_token,
+    receipt: 'JSv5FBbXbY:APA91bF2K9B0eh61f2WaTZvm62GOHon3-vElmVq54ZOL5PHpFkIc85WQUxUH_wae8YEUKkEzLCcUC5V4bTWNNPbjTxgZRvQ-PLONDMZWo_6hwiqhlMM7gIZHM2K2KhvX-9oCcyD1ERw4'
+  }, ref => callback(ref.response.token));
+};
+
 var auth = params => {
   vkapi.auth({
     login: login_input.value,
@@ -64,11 +71,9 @@ var auth = params => {
     platform: 0,
     code: sms_code.value
   }, data => {
-    login_button.disabled = false;
-    
-    // TODO: весь рендер и пихание данных перенести сюда
-    
     if(data.error) {
+      login_button.disabled = false;
+      
       if(data.error_description == 'Username or password is incorrect') {
         error_info.innerHTML = 'Неверный логин или пароль';
       }
@@ -90,17 +95,38 @@ var auth = params => {
     
     error_info.innerHTML = '';
     twofa_info.innerHTML = '';
+    refreshToken({ access_token: data.access_token }, ref_token => {
+      vkapi.method('users.get', {
+        access_token: data.access_token,
+        user_id: data.user_id,
+        fields: 'status,photo_100'
+      }, user_info => {
+        let users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf-8')) || {};
+        
+        users[data.user_id] = {
+          active: true,
+          id: data.user_id,
+          platform: data.platform,
+          login: data.login,
+          password: data.password,
+          downloadPath: process.env.USERPROFILE + '\\Downloads\\',
+          first_name: user_info.response[0].first_name,
+          last_name: user_info.response[0].last_name,
+          photo_100: user_info.response[0].photo_100,
+          status: user_info.response[0].status,
+          access_token: ref_token,
+          online_token: data.access_token
+        };
     
-    wrapper_login.style.display = '';
-    wrapper_content.style.display = 'block';
+        console.log(users[data.user_id]);
     
-    users = JSON.parse(fs.readFileSync(USERS_PATH, 'utf-8'));
-    
-    Object.keys(users).forEach(key => {
-      if(users[key].active) {
-        init(users, users[key]);
-        return;
-      }
+        fs.writeFile(USERS_PATH, JSON.stringify(users, null, 2), () => {
+          wrapper_login.style.display = '';
+          wrapper_content.style.display = 'block';
+          
+          init(users, users[data.user_id]);
+        });
+      }, 'error_info');
     });
   }, 'error_info');
 }

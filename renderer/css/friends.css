@@ -1,0 +1,43 @@
+.friends_list, .friends_list_err {
+  padding: 10px;
+}
+
+.friend_item, .friend_item_err {
+  background-color: white;
+  width: 100%;
+  max-width: 550px;
+  height: 80px;
+  padding: 5px;
+  box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
+  border-radius: 2px;
+  margin: 0 auto 10px auto;
+}
+
+.friend_img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  float: left;
+  margin-right: 12px;
+}
+
+.friend_names {
+  float: left;
+  padding-top: 2px;
+  width: calc(100% - 84px);
+}
+
+.friend_name, .friend_occupation {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.friend_occupation {
+  color: #656565;
+}
+
+.friend_verify {
+  margin-bottom: 2px;
+  vertical-align: middle;
+}

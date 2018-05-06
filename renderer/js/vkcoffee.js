@@ -3,10 +3,10 @@
   
   А я в свою очередь этот код подредактировал и вставил в свой проект.
 
-  Контактные данные:
+  Контактные данные разработчика клиента:
    vk: https://vk.com/danyadev
+   или https://vk.com/danyadev0
    telegram: https://t.me/danyadev
-   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 

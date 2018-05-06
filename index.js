@@ -1,14 +1,14 @@
 /* 
   Copyright © 2018 danyadev
+  Лицензия - Apache 2.0
 
   Контактные данные:
    vk: https://vk.com/danyadev
+   или https://vk.com/danyadev0
    telegram: https://t.me/danyadev
-   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 
-// отключение предупреждения в консоли
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
 
 try {
@@ -22,7 +22,8 @@ try {
       __dirname + '/node_modules',
       __dirname + '/package.json'
     ]
-})} catch(e) {};
+  });
+} catch(e) {};
 
 const { app, BrowserWindow } = require('electron');
 const fs = require('fs');

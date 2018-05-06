@@ -1,10 +1,11 @@
 /* 
   Copyright © 2018 danyadev
+  Лицензия - Apache 2.0
 
   Контактные данные:
    vk: https://vk.com/danyadev
+   или https://vk.com/danyadev0
    telegram: https://t.me/danyadev
-   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 
@@ -33,7 +34,7 @@ module.exports = (src, sid, callback) => {
   
   img.addEventListener('click', () => img.src += ~img.src.indexOf("rnd=") ? "1" : "&rnd=1");
   btn.addEventListener('click', () => {
-    document.body.removeChild(modal);
+    qs('.captcha_modal').remove();
     callback(input.value, sid);
   });
   

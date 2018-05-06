@@ -1,18 +1,20 @@
 /* 
   Copyright © 2018 danyadev
+  Лицензия - Apache 2.0
 
   Контактные данные:
    vk: https://vk.com/danyadev
+   или https://vk.com/danyadev0
    telegram: https://t.me/danyadev
-   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 
 'use strict';
 
+// Доступ к музыке имеется только у версии API 5.65 и выше.
+
 const { BrowserWindow } = require('electron').remote;
 const https = require('https');
-const vkapi = require('./../vkapi');
 
 danyadev.audio = {};
 
@@ -141,6 +143,25 @@ var render = cb => {
   renderItem();
 }
 
+var loadSoundBlock = () => {
+  content.addEventListener('scroll', renderNewItems);
+  
+  let h = window.screen.height > audiolist.clientHeight;
+  
+  if(h || audiolist.clientHeight - window.outerHeight < window.scrollY) renderNewItems();
+}
+
+var renderNewItems = () => {
+  let h = window.screen.height > audiolist.clientHeight,
+      l = audiolist.clientHeight - window.outerHeight < content.scrollTop,
+      a = qs('.content_audio').parentNode.classList.contains('content_active');
+  
+  if(a && (h || l)) {
+    content.removeEventListener('scroll', renderNewItems);
+    render();
+  }
+}
+
 player_icon_repeat.addEventListener('click', () => {
   if(player_icon_repeat.classList.contains('active')) {
     player_icon_repeat.classList.remove('active');
@@ -215,25 +236,6 @@ var initPlayer = () => {
   checkLocked();
 }
 
-var renderNewItems = () => {
-  let h = window.screen.height > audiolist.clientHeight,
-      l = audiolist.clientHeight - window.outerHeight < content.scrollTop,
-      a = qs('.content_audio').parentNode.classList.contains('content_active');
-  
-  if(a && (h || l)) {
-    content.removeEventListener('scroll', renderNewItems);
-    render();
-  }
-}
-
-var loadSoundBlock = () => {
-  content.addEventListener('scroll', renderNewItems);
-  
-  let h = window.screen.height > audiolist.clientHeight;
-  
-  if(h || audiolist.clientHeight - window.outerHeight < window.scrollY) renderNewItems();
-}
-
 var toggleAudio = (track, event) => {
   if(!track || event && event.target != track.children[0].children[1]) return;
 
@@ -268,6 +270,12 @@ var toggleAudio = (track, event) => {
   if(audio.src != track.attributes.src.value) { // если другой трек
     player_progress_loaded.style.width = '';
     player_progress_played.style.width = '';
+    
+    if(player_icon_repeat.classList.contains('active')) {
+      player_icon_repeat.classList.remove('active');
+      
+      danyadev.audio.repeat = false;
+    }
     
     audio.src = track.attributes.src.value;
     toggleTime('played');
@@ -446,13 +454,11 @@ audio.addEventListener('ended', () => { // переключение на сле�
 
 content.addEventListener('scroll', () => {
   if(content.scrollTop >= 56) { // 100 - 44, где 44 - высота шапки
-    audioplayer.style.position = 'fixed';
-    audioplayer.style.marginTop = '44px';
+    audioplayer.classList.add('audioplayer_fixed');
     
     qs('.pl50').style.display = 'block';
   } else {
-    audioplayer.style.position = '';
-    audioplayer.style.marginTop = '';
+    audioplayer.classList.remove('audioplayer_fixed');
     
     qs('.pl50').style.display = 'none';
   }
@@ -480,7 +486,7 @@ player_progress_wrap.addEventListener('mousedown', ev => {
   player_progress_wrap.classList.add('player_progress_active');
   
   let mousemove = e => {
-    let fixedOffset = (audioplayer.style.position == 'fixed') ? audioplayer.offsetLeft : 0,
+    let fixedOffset = audioplayer.classList.contains('audioplayer_fixed') ? audioplayer.offsetLeft : 0,
         offsetx = e.pageX - player_progress_wrap.offsetLeft - fixedOffset,
         curTime = offsetx / player_progress_wrap.offsetWidth, selWidth = curTime * 100;
         
@@ -497,7 +503,7 @@ player_progress_wrap.addEventListener('mousedown', ev => {
     document.removeEventListener('mousemove', mousemove);
     document.removeEventListener('mouseup', mouseup);
     
-    let fixedOffset = (audioplayer.style.position == 'fixed') ? audioplayer.offsetLeft : 0,
+    let fixedOffset = audioplayer.classList.contains('audioplayer_fixed') ? audioplayer.offsetLeft : 0,
         offsetx = e.pageX - player_progress_wrap.offsetLeft - fixedOffset;
     
     audio.currentTime = (offsetx * audio.duration) / player_progress_wrap.offsetWidth;
@@ -513,7 +519,7 @@ player_progress_wrap.addEventListener('mousedown', ev => {
 player_volume_wrap.addEventListener('mousedown', ev => {
   player_volume_wrap.classList.add('player_volume_active');
   
-  let fixedOffset = (audioplayer.style.position == 'fixed') ? audioplayer.offsetLeft : 0,
+  let fixedOffset = audioplayer.classList.contains('audioplayer_fixed') ? audioplayer.offsetLeft : 0,
       offsetx = ev.pageX - player_volume_wrap.offsetLeft - fixedOffset,
       volume = offsetx / player_volume_wrap.offsetWidth;
   
@@ -526,7 +532,7 @@ player_volume_wrap.addEventListener('mousedown', ev => {
   player_volume_this.style.width = selWidth + '%';
   
   let mousemove = e => {
-    fixedOffset = (audioplayer.style.position == 'fixed') ? audioplayer.offsetLeft : 0;
+    fixedOffset = audioplayer.classList.contains('audioplayer_fixed') ? audioplayer.offsetLeft : 0;
     offsetx = e.pageX - player_volume_wrap.offsetLeft - fixedOffset;
     volume = offsetx / player_volume_wrap.offsetWidth;
     
@@ -562,14 +568,14 @@ var arrayShuffle = arr => {
   );
 };
 
-var downloadAudio = (block) => {
+var downloadAudio = block => {
   let data = JSON.parse(block.attributes.data.value),
       author = data[0], name = data[1], url = data[2];
   
   if(block.classList.contains('audio_downloaded')) return;
   
   setTimeout(() => {
-    let file_name = author + ' – ' + name + '.mp3',
+    let file_name = `${author} – ${name}.mp3`,
         file = fs.createWriteStream(danyadev.user.downloadPath + file_name);
   
     https.get(url, res => {

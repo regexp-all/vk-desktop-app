@@ -18,11 +18,13 @@
 @import "css/settings.css";
 @import "css/news.css";
 @import "css/groups.css";
+@import "css/friends.css";
 
 * { box-sizing: border-box }
 
 body {
-  font-family: 'Roboto', 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
+  font-family: '-apple-system', 'BlinkMacSystemFont', 'Roboto',
+               'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
   font-size: 14px;
   margin: 0;
   overflow: hidden;

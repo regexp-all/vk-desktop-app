@@ -1,16 +1,15 @@
 /* 
   Copyright © 2018 danyadev
+  Лицензия - Apache 2.0
 
   Контактные данные:
    vk: https://vk.com/danyadev
+   или https://vk.com/danyadev0
    telegram: https://t.me/danyadev
-   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 
 'use strict';
-
-const vkapi = require('./vkapi');
 
 var acc_status = qs('.menu_acc_status'),
     menu_account_bgc = qs('.menu_account_bgc'),
