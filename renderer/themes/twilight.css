@@ -70,8 +70,9 @@
 /* и для самой иконки */
 .twilight_theme .open_menu_icon { background-color: #bbbbbb }
 
-/* стили для пустого кавера в плеере */
+/* стили для пустого кавера */
 .twilight_theme .player_cover { background-color: #363d42 }
+.twilight_theme .audio_cover { background-color: #363d42 }
 
 /* стили для полоски перемотки трека */
 .twilight_theme .player_progress_all { background-color: #4a4a4a }

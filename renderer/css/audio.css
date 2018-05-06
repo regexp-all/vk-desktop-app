@@ -1,4 +1,4 @@
-/* 
+/*
   Copyright © 2018 danyadev
   Лицензия - Apache 2.0
 
@@ -320,8 +320,8 @@
 }
 
 .audio_cover {
-  background-image: url('../images/audio_row_placeholder.png');
-  background-size: cover;
+  background-image: url('../images/empty_cover.svg');
+  background-color: #f5f6f8;
 }
 
 .audio_cover_play:hover, .audio_cover_has_play {
