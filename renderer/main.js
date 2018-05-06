@@ -1,5 +1,6 @@
 /* 
   Copyright © 2018 danyadev
+  Лицензия - Apache 2.0
 
   Контактные данные:
    vk: https://vk.com/danyadev
@@ -22,6 +23,7 @@ const MENU_WIDTH = utils.MENU_WIDTH;
 const theme = require('./js/theme'); theme();
 const update = require('./js/update'); update();
 const settings_json = require('./settings.json');
+const vkapi = require('./js/vkapi');
 
 var header = qs('.header'),
     content = qs('.content'),

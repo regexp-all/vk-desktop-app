@@ -1,10 +1,11 @@
 /* 
   Copyright © 2018 danyadev
+  Лицензия - Apache 2.0
 
   Контактные данные:
    vk: https://vk.com/danyadev
+   или https://vk.com/danyadev0
    telegram: https://t.me/danyadev
-   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 
@@ -20,7 +21,7 @@
   padding: 5px;
   box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
   border-radius: 2px;
-  margin-bottom: 10px;
+  margin: 0 auto 10px auto;
 }
 
 .group_img {
@@ -45,11 +46,24 @@
 
 .group_name {
   color: #2a5885;
-  font-weight: 400;
   cursor: pointer;
 }
 
 .group_type, .group_subs {
   color: #656565;
   padding-top: 4px;
+}
+
+.group_wrap_err {
+  padding: 0 10px;
+}
+
+.group_item_err {
+  max-width: 550px;
+  margin: 0 auto;
+  text-align: center;
+  background-color: white;
+  padding: 20px 0;
+  box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
+  border-radius: 2px;
 }

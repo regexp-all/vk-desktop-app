@@ -1,10 +1,11 @@
 /* 
   Copyright © 2018 danyadev
+  Лицензия - Apache 2.0
 
   Контактные данные:
    vk: https://vk.com/danyadev
+   или https://vk.com/danyadev0
    telegram: https://t.me/danyadev
-   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 
@@ -93,10 +94,10 @@ var getLocalFiles = callback => {
       } else files_.push(name.replace(/\\/g, '/'));
     }
 
-    return files_;
+    callback(files_);
   };
 
-  callback(getFiles(app_path));
+  getFiles(app_path);
 }
 
 var update = () => {
@@ -121,16 +122,19 @@ var update = () => {
           getLocalFiles(localFiles => {
             let deleteFiles = localFiles.filter(file => !allFiles.includes(file));
             
-            deleteFiles.forEach(file => fs.unlink(file, () => {}));
+            deleteFiles.forEach(file => fs.unlinkSync(file));
           });
           
           files.forEach((filename, i) => {
-            let githubFile = filename.replace(app_path+'/', '');
+            let githubFile = filename.replace(app_path, '');
             
-            if(!fs.existsSync(filename)) mkdirP(filename);
+            if(!fs.existsSync(filename)) {
+              mkdirP(filename.replace(/[A-z]+\.[A-z]+/, ''));
+            }
+            
             request({
               host: 'raw.githubusercontent.com',
-              path: `/danyadev/vk-desktop-app/master/${encodeURIComponent(githubFile)}`
+              path: `/danyadev/vk-desktop-app/master${encodeURIComponent(githubFile)}`
             }, res => {
               let body = Buffer.alloc(0);
               

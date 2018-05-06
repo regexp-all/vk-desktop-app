@@ -1,10 +1,11 @@
 /* 
   Copyright © 2018 danyadev
+  Лицензия - Apache 2.0
 
   Контактные данные:
    vk: https://vk.com/danyadev
+   или https://vk.com/danyadev0
    telegram: https://t.me/danyadev
-   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 
@@ -45,8 +46,9 @@ const fs = require('fs');
 const querystring = require('querystring');
 const { getCurrentWindow } = require('electron').remote;
 const utils = require('./utils');
-const USERS_PATH = utils.USERS_PATH;
 const request = utils.request;
+const client_keys = utils.keys;
+const USERS_PATH = utils.USERS_PATH;
 const API_VERSION = 5.74;
 const captcha = require('./captcha');
 
@@ -69,9 +71,9 @@ var method = (method, params, callback, target) => {
     if(users[user_id].active) id = user_id;
   });
   
-  params.access_token = params.access_token || users[id].access_token;
-  
   console.log(method, params);
+  
+  params.access_token = params.access_token || users[id].access_token;
   
   request({
     host: 'api.vk.com',
@@ -83,23 +85,35 @@ var method = (method, params, callback, target) => {
 
     res.on('data', ch => body = Buffer.concat([body, ch]));
     res.on('end', () => {
-      body = JSON.parse(body);
+      body = body.toString();
+      
+      if(body[0] == '<') {
+        let a = document.createElement('div');
+        a.innerHTML = body;
+        
+        body = {
+          error: a.getElementsByTagName('title')[0].outerText
+        };
+      } else body = JSON.parse(body);
+      
       console.log(body);
       
       if(body.error) {
+        // TODO: встроить капчу
+        // captcha(body.captcha_img, body.captcha_sid, (key, sid) => {});
+        
         if(body.error.error_msg == 'User authorization failed: invalid session.') {
+          console.log(body.error.error_code);
           // можно будет выводить окошечко с формой входа, где будет логин и пароль уже введен
           delete users[id];
           
           if(Object.keys(users).length > 0) users[Object.keys(users)[0]].active = true;
           fs.writeFileSync(USERS_PATH, JSON.stringify(users, null, 2));
           getCurrentWindow().reload();
+        } else if(body.error.ban_info) {
+          qs('.user_banned').style.display = 'block';
         }
-        
-        // captcha(body.captcha_img, body.captcha_sid, (key, sid) => {});
-      }
-      
-      callback(body);
+      } else callback(body);
     });
   }, target);
 }
@@ -108,11 +122,15 @@ var auth = (params, callback, target) => {
   let users = fs.readFileSync(USERS_PATH, 'utf-8');
   
   params.login = params.login.replace('+', '');
+  params.platform = params.platform || 0;
+  callback = callback || (() => {});
+  
+  let client = client_keys[params.platform];
   
   let reqData = {
     grant_type: 'password',
-    client_id: 2274003, // Android ключики
-    client_secret: 'hHbZxrka2uZ6jB1inYsH',
+    client_id: client[0],
+    client_secret: client[1],
     username: params.login,
     password: params.password,
     scope: 'all',
@@ -121,14 +139,12 @@ var auth = (params, callback, target) => {
     v: API_VERSION
   }
   
-  if(params.captcha_sid && params.captcha_key) {
+  if(params.captcha_sid) {
     reqData.captcha_sid = params.captcha_sid;
     reqData.captcha_key = params.captcha_key;
   }
   
   if(params.code) reqData.code = params.code;
-  
-  console.log(reqData);
   
   request({
     host: 'oauth.vk.com',
@@ -141,113 +157,18 @@ var auth = (params, callback, target) => {
       body = JSON.parse(body);
       users = JSON.parse(users);
       
-      console.log(params);
-      console.log(body);
-      
-      if(body.error) {
-        if(body.error == 'need_captcha') {
-          qs('.login_button').disabled = false;
-          
-          captcha(body.captcha_img, body.captcha_sid, (key, sid) => {
-            auth(Object.assign(params, { captcha_key: key, captcha_sid: sid }),
-                 callback,
-                 target);
-          });
-        } else callback(body);
+      if(body.error == 'need_captcha') {
+        qs('.login_button').disabled = false;
         
-        return;
-      }
-      
-      method('users.get', {
-        access_token: body.access_token,
-        user_id: body.user_id,
-        fields: 'status,photo_100'
-      }, user_info => {
-        refreshToken({
-          access_token: body.access_token
-        }, ref_token => {
-          users[body.user_id] = {
-            active: true,
-            id: body.user_id,
-            platform: params.platform,
-            login: params.login,
-            password: params.password,
-            downloadPath: process.env.USERPROFILE + '\\Downloads\\',
-            first_name: user_info.response[0].first_name,
-            last_name: user_info.response[0].last_name,
-            photo_100: user_info.response[0].photo_100,
-            status: user_info.response[0].status,
-            online_token: body.access_token,
-            access_token: ref_token
-          };
-          
-          console.log(users[body.user_id]);
-          
-          fs.writeFile(USERS_PATH, JSON.stringify(users, null, 2), () => callback(users));
+        captcha(body.captcha_img, body.captcha_sid, (key, sid) => {
+          auth(Object.assign(body, params, { captcha_key: key, captcha_sid: sid }),
+               callback,
+               target);
         });
-      });
+      } else callback(Object.assign(body, params));
     });
   }, target);
 };
-
-var refreshToken = (data, callback) => {
-  method('auth.refreshToken', {
-    access_token: data.access_token,
-    receipt: 'JSv5FBbXbY:APA91bF2K9B0eh61f2WaTZvm62GOHon3-vElmVq54ZOL5PHpFkIc85WQUxUH_wae8YEUKkEzLCcUC5V4bTWNNPbjTxgZRvQ-PLONDMZWo_6hwiqhlMM7gIZHM2K2KhvX-9oCcyD1ERw4'
-  }, ref => callback(ref.response.token));
-};
-
-var resetOnline = (params, callback) => {
-  let users = fs.readFileSync(USERS_PATH, 'utf-8');
-  
-  params.login = params.login.replace('+', '');
-  
-  let reqData = {
-    grant_type: 'password',
-    client_id: keys[params.platform[0]][0],
-    client_secret: keys[params.platform[0]][1],
-    username: params.login,
-    password: params.password,
-    scope: 'all',
-    '2fa_supported': true,
-    force_sms: true,
-    v: API_VERSION
-  }
-  
-  if(params.captcha_sid && params.captcha_key) {
-    reqData.captcha_sid = params.captcha_sid;
-    reqData.captcha_key = params.captcha_key;
-  }
-  
-  if(params.code) reqData.code = params.code;
-  
-  request({
-    host: 'oauth.vk.com',
-    path: `/token/?${toURLogin(reqData)}`
-  }, res => {
-    let body = Buffer.alloc(0);
-
-    res.on('data', ch => body = Buffer.concat([body, ch]));
-    res.on('end', () => {
-      body = JSON.parse(body);
-      users = JSON.parse(users);
-      
-      console.log(params);
-      console.log(body);
-      
-      if(body.error) {
-        callback(body);
-        return;
-      }
-        
-      let online = {
-        access_token: body.access_token
-      };
-      
-      // вставляем онлайн в текущий онлайн
-    });
-  });
-}
 
 var longpoll = (params, callback) => {
   let options = {
@@ -266,6 +187,5 @@ var longpoll = (params, callback) => {
 
 module.exports = {
   method,
-  auth,
-  resetOnline
+  auth
 };

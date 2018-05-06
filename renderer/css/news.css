@@ -1,32 +1,86 @@
 /* 
   Copyright © 2018 danyadev
+  Лицензия - Apache 2.0
 
   Контактные данные:
    vk: https://vk.com/danyadev
+   или https://vk.com/danyadev0
    telegram: https://t.me/danyadev
-   альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
 
 .news_content {
-  padding: 20px;
+  padding: 15px;
+}
+
+.news_content_err {
+  padding: 0 15px;
+  margin-top: -15px;
 }
 
 .news_block {
   background-color: white;
   box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
   border-radius: 2px;
-  padding: 10px;
   margin-bottom: 15px;
   overflow-wrap: break-word;
 }
 
-.news_block_err {
-  margin: 0 20px;
-}
-
 .news_inet_err {
-  margin: 20px auto;
+  margin: 0 auto;
+  padding: 20px 0;
   width: 220px;
   text-align: center;
+}
+
+.post_header {
+  padding: 10px 6px 6px 10px;
+  height: 60px;
+}
+
+.post_header_img {
+  border-radius: 50%;
+  float: left;
+  margin-right: 10px;
+}
+
+.post_names {
+  padding-top: 4px;
+}
+
+.post_name {
+  color: #2a5885;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.post_time {
+  color: #656565;
+  padding-top: 2px;
+}
+
+.post_content {
+  padding: 10px;
+}
+
+.post_img {
+  /* max-width: 100%; */
+  width:inherit;
+  max-height: 300px;
+}
+
+.emoji {
+  margin: 0 1px;
+  vertical-align: -3px;
+}
+
+.post_signer {
+  display: inline-block;
+  padding: 0 15px;
+  margin: 5px 0;
+  background: url('../images/post_sign.svg') no-repeat;
+  background-position: left 3px;
+  line-height: 15px;
+  color: #2a5885;
+  cursor: pointer;
 }
