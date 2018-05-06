@@ -88,9 +88,11 @@ var render = cb => {
     if(item.url) {
       audio_block = `<div class='audio_item' src='${item.url}' `
                   + `onclick='require("./js/modules/audio").toggleAudio(this, event)'>`;
-    } else audio_block = `<div class='audio_item_locked' title='Аудиозапись изъята из публичного доступа'>`;
+    } else {
+      audio_block = `<div class='audio_item_locked'
+                          title='Аудиозапись изъята из публичного доступа'>`;
+    }
 
-    // innerHTML тут для подсветки HTML синтаксиса в Atom'е
     block.innerHTML += `
       ${audio_block}
         <div class='audio_covers'>
@@ -612,6 +614,5 @@ var downloadAudio = block => {
 module.exports = {
   load,
   toggleAudio,
-  toggleTime,
-  downloadAudio
+  toggleTime
 }
