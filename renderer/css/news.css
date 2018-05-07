@@ -41,6 +41,7 @@
 }
 
 .post_name {
+  display: inline;
   color: #2a5885;
   cursor: pointer;
   font-weight: 500;
@@ -73,7 +74,7 @@
 
 .post_signer {
   display: inline-block;
-  padding: 0 15px;
+  padding: 0 0 0 15px;
   margin: 5px 0;
   background: url('../images/post_sign.svg') no-repeat;
   background-position: left 3px;
