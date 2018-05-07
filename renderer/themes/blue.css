@@ -1,4 +1,4 @@
-/* 
+/*
   Copyright © 2018 danyadev
 
   Контактные данные:
@@ -7,6 +7,11 @@
    альтернативная ссылка: https://t.elegram.ru/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
+
+/* выделение */
+.blue_theme .post_content::selection {
+  background-color: rgb(32, 32, 32);
+}
 
 /* стили для блоков и шапки */
 .blue_theme .theme_block {
@@ -26,7 +31,9 @@
   color: #c2c2c2;
 }
 
-.blue_theme .group_name {
+.blue_theme .group_name,
+.blue_theme .post_name,
+.blue_theme .post_signer {
   color: #ebebeb;
 }
 
@@ -97,3 +104,5 @@
 .blue_theme .option.active {
   background-color: #2a394a;
 }
+
+/* стили дл */

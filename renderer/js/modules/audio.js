@@ -46,6 +46,10 @@ audio.play = () => audio._play().catch(err => {
 
 player_volume_this.style.width = settings_json.audio.volume * 100 + '%';
 audio.volume = settings_json.audio.volume;
+if (settings_json.audio.repeat) {
+  danyadev.audio.repeat = true
+  player_icon_repeat.classList.add('active');
+}
 
 danyadev.audio.renderedItems = 0;
 danyadev.audio.track_id = 0;
@@ -147,9 +151,9 @@ var render = cb => {
 
 var loadSoundBlock = () => {
   content.addEventListener('scroll', renderNewItems);
-  
+
   let h = window.screen.height > audiolist.clientHeight;
-  
+
   if(h || audiolist.clientHeight - window.outerHeight < window.scrollY) renderNewItems();
 }
 
@@ -157,7 +161,7 @@ var renderNewItems = () => {
   let h = window.screen.height > audiolist.clientHeight,
       l = audiolist.clientHeight - window.outerHeight < content.scrollTop,
       a = qs('.content_audio').parentNode.classList.contains('content_active');
-  
+
   if(a && (h || l)) {
     content.removeEventListener('scroll', renderNewItems);
     render();
@@ -167,12 +171,14 @@ var renderNewItems = () => {
 player_icon_repeat.addEventListener('click', () => {
   if(player_icon_repeat.classList.contains('active')) {
     player_icon_repeat.classList.remove('active');
-
     danyadev.audio.repeat = false;
+    settings_json.audio.repeat = false;
+    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings_json, null, 2));
   } else {
     player_icon_repeat.classList.add('active');
-
     danyadev.audio.repeat = true;
+    settings_json.audio.repeat = true;
+    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings_json, null, 2));
   }
 });
 
@@ -291,13 +297,13 @@ var toggleAudio = (track, event) => {
   if(audio.src != track.attributes.src.value) { // если другой трек
     player_progress_loaded.style.width = '';
     player_progress_played.style.width = '';
-    
+
     if(player_icon_repeat.classList.contains('active')) {
       player_icon_repeat.classList.remove('active');
-      
+
       danyadev.audio.repeat = false;
     }
-    
+
     audio.src = track.attributes.src.value;
     toggleTime('played');
 
@@ -476,11 +482,11 @@ audio.addEventListener('ended', () => { // переключение на сле�
 content.addEventListener('scroll', () => {
   if(content.scrollTop >= 56) { // 100 - 44, где 44 - высота шапки
     audioplayer.classList.add('audioplayer_fixed');
-    
+
     qs('.pl50').style.display = 'block';
   } else {
     audioplayer.classList.remove('audioplayer_fixed');
-    
+
     qs('.pl50').style.display = 'none';
   }
 });
@@ -523,7 +529,7 @@ player_progress_wrap.addEventListener('mousedown', ev => {
 
     document.removeEventListener('mousemove', mousemove);
     document.removeEventListener('mouseup', mouseup);
-    
+
     let fixedOffset = audioplayer.classList.contains('audioplayer_fixed') ? audioplayer.offsetLeft : 0,
         offsetx = e.pageX - player_progress_wrap.offsetLeft - fixedOffset;
 
@@ -539,7 +545,7 @@ player_progress_wrap.addEventListener('mousedown', ev => {
 // громкость
 player_volume_wrap.addEventListener('mousedown', ev => {
   player_volume_wrap.classList.add('player_volume_active');
-  
+
   let fixedOffset = audioplayer.classList.contains('audioplayer_fixed') ? audioplayer.offsetLeft : 0,
       offsetx = ev.pageX - player_volume_wrap.offsetLeft - fixedOffset,
       volume = offsetx / player_volume_wrap.offsetWidth;

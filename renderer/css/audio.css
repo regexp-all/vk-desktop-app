@@ -11,6 +11,7 @@
 
 .content_audio {
   display: flex;
+  cursor: default;
   justify-content: center;
 }
 

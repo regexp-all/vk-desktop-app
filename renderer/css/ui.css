@@ -8,6 +8,9 @@
    telegram: https://t.me/danyadev
    github: https://github.com/danyadev/vk-desktop-app
 */
+* {
+  user-select: none;
+}
 
 .header {
   width: 100%;
@@ -266,4 +269,16 @@
 .user_banned_info {
   display: inline-block;
   margin: 0 auto;
+}
+
+.wrap_err {
+  cursor: default;
+  padding: 0 15px;
+  margin-top: -15px;
+}
+
+.err {
+  margin: 0 auto;
+  padding: 20px 0;
+  text-align: center;
 }

@@ -4,7 +4,8 @@
     "height": 480
   },
   "audio": {
-    "volume": 0.63
+    "volume": 1,
+    "repeat": false
   },
   "settings": {
     "theme": "white",

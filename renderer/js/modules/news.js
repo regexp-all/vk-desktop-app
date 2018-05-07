@@ -1,4 +1,4 @@
-/* 
+/*
   Copyright © 2018 danyadev
   Лицензия - Apache 2.0
 
@@ -24,7 +24,7 @@ var load = () => {
     path: '/danyadev/data/master/develop'
   }, res => {
     let ver_list = Buffer.alloc(0);
-  
+
     res.on('data', ch => ver_list = Buffer.concat([ver_list, ch]));
     res.on('end', () => {
       danyadev.verified = JSON.parse(ver_list);
@@ -84,19 +84,19 @@ var getNews = () => {
         item.source_id = item.source_id.toString().replace(/-/, '');
         head_data = data.response.groups.find(el => el.id == item.source_id);
         head_name = head_data.name;
-        
+
         if(head_data.verified || danyadev.verified[1].includes(head_data.id)) {
           verified = '<img class="friend_verify" src="images/verify.png">';
         }
       } else {
         head_data = data.response.profiles.find(el => el.id == item.source_id);
         head_name = `${head_data.first_name} ${head_data.last_name}`;
-        
+
         if(head_data.verified || danyadev.verified[0].includes(head_data.id)) {
           verified = '<img class="friend_verify" src="images/verify.png">';
         }
       }
-      
+
       if(item.copy_history) {
         text += '<br>*репост*';
       }
@@ -104,7 +104,7 @@ var getNews = () => {
       if (item.attachments) {
         for (let j = 0; j < item.attachments.length; j++) {
           let attach = item.attachments[j];
-          
+
           text += '<br>';
 
           if (attach.type == 'photo') {
@@ -139,7 +139,7 @@ var getNews = () => {
       news_content.innerHTML += `
         <div class='news_block theme_block'>
           <div class='post_header'>
-            <img src="${head_data.photo_50}" class="post_header_img">
+            <div style="background-image:url(${head_data.photo_50})" class="post_header_img"></div>
             <div class="post_names">
               <div class="post_name">${head_name} ${verified}</div>
               <div class="post_time">${parsed_time}</div>
@@ -175,13 +175,13 @@ var renderNewItems = () => {
 
 // if(item.type == 'friend') {
 //   let creator = data.response.profiles.find(el => el.id == item.source_id);
-// 
+//
 //   text += `${creator.first_name} ${creator.last_name} добавил${creator.sex == 1 ? 'a' : ''} в друзья `;
-// 
+//
 //   item.friends.items.forEach((item_, i) => {
 //     let user = data.response.profiles.find(el => el.id == item_.user_id);
 //     text += `${user.first_name_acc} ${user.last_name_acc}`;
-// 
+//
 //     if(i == item.friends.items.length-1) text += '.';
 //     else text += ', ';
 //   })

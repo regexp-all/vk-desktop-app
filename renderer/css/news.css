@@ -1,4 +1,4 @@
-/* 
+/*
   Copyright © 2018 danyadev
   Лицензия - Apache 2.0
 
@@ -13,24 +13,12 @@
   padding: 15px;
 }
 
-.news_content_err {
-  padding: 0 15px;
-  margin-top: -15px;
-}
-
 .news_block {
   background-color: white;
   box-shadow: 0 1px 0 0 #d7d8db, 0 0 0 1px #e3e4e8;
   border-radius: 2px;
   margin-bottom: 15px;
   overflow-wrap: break-word;
-}
-
-.news_inet_err {
-  margin: 0 auto;
-  padding: 20px 0;
-  width: 220px;
-  text-align: center;
 }
 
 .post_header {
@@ -42,6 +30,10 @@
   border-radius: 50%;
   float: left;
   margin-right: 10px;
+  width: 50px;
+  height: 50px;
+  background-size: cover;
+  cursor: pointer;
 }
 
 .post_names {
@@ -60,7 +52,12 @@
 }
 
 .post_content {
+  user-select: text;
   padding: 10px;
+}
+
+.post_content::selection {
+  background-color: rgb(192, 192, 192);
 }
 
 .post_img {
